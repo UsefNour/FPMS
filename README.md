@@ -100,6 +100,43 @@ FPMS/
 
 ---
 
+## Screenshots
+
+### Dashboard
+![Dashboard](screenshots/02_dashboard.png)
+
+### Camp Planner
+![Camp Planner](screenshots/03_camp_plan.png)
+
+### Game Plan Output
+![Game Plan](screenshots/08_game_plan_output.png)
+
+### Weight Tracker
+![Weight Tracker](screenshots/09_weight_tracker.png)
+
+### Risk & Readiness Score
+![Risk Readiness](screenshots/10_risk_readiness.png)
+
+### Sparring Dashboard
+![Sparring](screenshots/04_sparring_dashboard.png)
+
+### Real-Time Chat
+![Chat](screenshots/11_chat.png)
+
+### Events
+![Events](screenshots/05_events.png)
+
+### Fighter Database
+![Fighters](screenshots/12_fighter_db.png)
+
+### Database Schema (ERD)
+![ERD](screenshots/01_database_schema.png)
+
+### Application Architecture
+![Architecture](screenshots/app_architecture.png)
+
+---
+
 ## Submission
 
 **Student:** Yousef Nour — Student ID: 23019868  
