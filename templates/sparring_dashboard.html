@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}Sparring Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>Sparring Dashboard</h1>
+                <a href="{{ url_for('sparring.sparring_profile') }}" class="btn btn-outline-primary">Edit Profile</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Summary -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-id-card me-2"></i>Your Profile</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong><i class="fas fa-map-marker-alt me-2 text-primary"></i>Location:</strong> {{ profile.location }}</p>
+                    {% if profile.latitude and profile.longitude %}
+                        <p class="small text-success"><i class="fas fa-check-circle me-1"></i>GPS coordinates set</p>
+                    {% else %}
+                        <p class="small text-warning"><i class="fas fa-exclamation-triangle me-1"></i>No GPS coordinates - <a href="{{ url_for('sparring.sparring_profile') }}">Update profile</a></p>
+                    {% endif %}
+                    <hr>
+                    <p><strong><i class="fas fa-graduation-cap me-2 text-info"></i>Skill Level:</strong> {{ profile.skill_level }}</p>
+                    <p><strong><i class="fas fa-fist-raised me-2 text-danger"></i>Style:</strong> {{ profile.preferred_styles }}</p>
+                    <p><strong><i class="fas fa-star me-2 text-warning"></i>Self Rating:</strong> {{ profile.self_skill_rating }}/10</p>
+                    <p><strong><i class="fas fa-balance-scale me-2 text-success"></i>Honesty Score:</strong> {{ "%.0f"|format(profile.honesty_score * 100) }}%</p>
+                    <p><strong><i class="fas fa-route me-2 text-secondary"></i>Max Distance:</strong> {{ profile.max_distance }} miles</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-users me-2"></i>Potential Sparring Partners</h5>
+                    <span class="badge bg-primary">{{ potential_matches|length }} matches</span>
+                </div>
+                <div class="card-body">
+                    {% if potential_matches %}
+                        <div class="row">
+                            {% for match in potential_matches %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100 border-{% if match.compatibility >= 80 %}success{% elif match.compatibility >= 65 %}primary{% else %}secondary{% endif %}">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-start mb-3">
+                                            <!-- Profile Picture -->
+                                            <div class="me-3">
+                                                {% if match.user.profile_picture %}
+                                                    <img src="{{ url_for('static', filename=match.user.profile_picture) }}" 
+                                                         alt="{{ match.user.username }}" 
+                                                         class="rounded-circle" 
+                                                         style="width: 60px; height: 60px; object-fit: cover; border: 2px solid {% if match.compatibility >= 80 %}#198754{% elif match.compatibility >= 65 %}#0d6efd{% else %}#6c757d{% endif %};">
+                                                {% else %}
+                                                    <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" 
+                                                         style="width: 60px; height: 60px; border: 2px solid {% if match.compatibility >= 80 %}#198754{% elif match.compatibility >= 65 %}#0d6efd{% else %}#6c757d{% endif %};">
+                                                        <i class="fas fa-user text-white fa-lg"></i>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            <!-- User Info -->
+                                            <div class="flex-grow-1">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <h6 class="card-title mb-1">{{ match.user.username }}</h6>
+                                                    <span class="badge bg-{% if match.compatibility >= 80 %}success{% elif match.compatibility >= 65 %}primary{% else %}secondary{% endif %}">
+                                                        {{ match.compatibility }}% Match
+                                                    </span>
+                                                </div>
+                                                <p class="card-text mb-1">
+                                                    <span class="badge bg-light text-dark me-1">{{ match.profile.skill_level }}</span>
+                                                    <span class="badge bg-light text-dark">{{ match.profile.preferred_styles }}</span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <p class="card-text small text-muted mb-2">
+                                            <i class="fas fa-map-marker-alt me-1"></i>{{ match.profile.location }}
+                                            {% if match.distance %}
+                                                <span class="ms-2"><i class="fas fa-route me-1"></i><strong>{{ match.distance }} mi</strong></span>
+                                            {% endif %}
+                                        </p>
+                                        {% if match.profile.availability %}
+                                        <p class="card-text small text-muted mb-2">
+                                            <i class="fas fa-clock me-1"></i>{{ match.profile.availability[:50] }}{% if match.profile.availability|length > 50 %}...{% endif %}
+                                        </p>
+                                        {% endif %}
+                                        <div class="d-flex gap-2">
+                                            <a href="{{ url_for('sparring.sparring_partner_profile', partner_id=match.user.id) }}" class="btn btn-sm btn-outline-secondary flex-grow-1">
+                                                <i class="fas fa-user me-1"></i>View Profile
+                                            </a>
+                                            <a href="{{ url_for('sparring.request_sparring_session', partner_id=match.user.id) }}" class="btn btn-sm btn-primary flex-grow-1">
+                                                <i class="fas fa-handshake me-1"></i>Request
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                            <p class="text-muted mb-0">No potential matches found yet.</p>
+                            <p class="text-muted small">As more fighters join and create profiles, you'll see matches here!</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sparring Sessions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Your Sparring Sessions</h5>
+                </div>
+                <div class="card-body">
+                    {% if my_sessions %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Partner</th>
+                                        <th>Date & Time</th>
+                                        <th>Location</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for session in my_sessions %}
+                                    <tr>
+                                        <td>
+                                            {% if session.requester_id == current_user.id %}
+                                                {{ session.partner.username }}
+                                            {% else %}
+                                                {{ session.requester.username }}
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ session.session_date.strftime('%Y-%m-%d %I:%M %p') }}</td>
+                                        <td>{{ session.location }}</td>
+                                        <td>
+                                            <span class="badge
+                                                {% if session.status == 'pending' %}bg-warning
+                                                {% elif session.status == 'accepted' %}bg-success
+                                                {% elif session.status == 'declined' %}bg-danger
+                                                {% elif session.status == 'completed' %}bg-info
+                                                {% endif %}">
+                                                {{ session.status.title() }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if session.status == 'pending' and session.partner_id == current_user.id %}
+                                                <form method="POST" action="{{ url_for('sparring.respond_session', session_id=session.id, action='accept') }}" class="d-inline">
+                                                    <button type="submit" class="btn btn-sm btn-success">Accept</button>
+                                                </form>
+                                                <form method="POST" action="{{ url_for('sparring.respond_session', session_id=session.id, action='decline') }}" class="d-inline">
+                                                    <button type="submit" class="btn btn-sm btn-danger">Decline</button>
+                                                </form>
+                                            {% elif session.status == 'accepted' %}
+                                                <form method="POST" action="{{ url_for('sparring.respond_session', session_id=session.id, action='complete') }}" class="d-inline">
+                                                    <button type="submit" class="btn btn-sm btn-primary">Mark Complete</button>
+                                                </form>
+                                            {% elif session.status == 'completed' %}
+                                                <a href="{{ url_for('sparring.assess_session', session_id=session.id) }}" class="btn btn-sm btn-outline-primary">Assess</a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No sparring sessions yet. Start by requesting a session with a potential partner!</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

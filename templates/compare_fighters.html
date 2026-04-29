@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+
+{% block title %}Compare Fighters - FPMS{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-balance-scale me-2"></i>Compare Fighters</h5>
+                </div>
+                <div class="card-body">
+                    <form method="GET" action="{{ url_for('fighters.compare_fighters') }}" class="row g-3 align-items-end">
+                        <div class="col-md-5">
+                            <label for="fighter1" class="form-label">Fighter 1</label>
+                            <select name="fighter1" id="fighter1" class="form-select" required>
+                                <option value="">Select Fighter...</option>
+                                {% for fighter in all_fighters %}
+                                <option value="{{ fighter.id }}" {% if fighter1 and fighter.id == fighter1.id %}selected{% endif %}>
+                                    {{ fighter.name }} ({{ fighter.weight_class }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <span class="display-6 text-muted">VS</span>
+                        </div>
+                        <div class="col-md-5">
+                            <label for="fighter2" class="form-label">Fighter 2</label>
+                            <select name="fighter2" id="fighter2" class="form-select" required>
+                                <option value="">Select Fighter...</option>
+                                {% for fighter in all_fighters %}
+                                <option value="{{ fighter.id }}" {% if fighter2 and fighter.id == fighter2.id %}selected{% endif %}>
+                                    {{ fighter.name }} ({{ fighter.weight_class }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12 text-center mt-3">
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                                <i class="fas fa-exchange-alt me-2"></i>Compare
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if fighter1 and fighter2 %}
+    <!-- Comparison Results -->
+    <div class="row">
+        <!-- Fighter 1 -->
+        <div class="col-md-5">
+            <div class="card h-100" style="border-left: 4px solid #e94560;">
+                <div class="card-header text-center" style="background: linear-gradient(135deg, #e94560, #ff6b6b); color: white;">
+                    <h4 class="mb-0">
+                        {{ fighter1.name }}
+                        {% if fighter1.nickname %}<br><small>"{{ fighter1.nickname }}"</small>{% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Record -->
+                    <div class="text-center mb-4">
+                        <h2 class="mb-0" style="color: #e94560;">{{ fighter1.record or 'N/A' }}</h2>
+                        <small class="text-muted">Record (W-L-D)</small>
+                    </div>
+
+                    <!-- Stats Table -->
+                    <table class="table table-sm">
+                        <tr>
+                            <td><strong>Weight Class</strong></td>
+                            <td class="text-end">{{ fighter1.weight_class }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Fighting Style</strong></td>
+                            <td class="text-end">{{ fighter1.fighting_style or 'Unknown' }}</td>
+                        </tr>
+                    </table>
+
+                    <!-- Strengths -->
+                    <div class="mt-3">
+                        <h6 class="text-success"><i class="fas fa-arrow-up me-1"></i>Strengths</h6>
+                        {% if fighter1.strengths %}
+                        <div class="d-flex flex-wrap gap-1">
+                            {% for strength in fighter1.strengths.split(',') %}
+                            <span class="badge bg-success">{{ strength.strip() }}</span>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <span class="text-muted">No data</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Weaknesses -->
+                    <div class="mt-3">
+                        <h6 class="text-danger"><i class="fas fa-arrow-down me-1"></i>Weaknesses</h6>
+                        {% if fighter1.weaknesses %}
+                        <div class="d-flex flex-wrap gap-1">
+                            {% for weakness in fighter1.weaknesses.split(',') %}
+                            <span class="badge bg-danger">{{ weakness.strip() }}</span>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <span class="text-muted">No data</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Notable Fights -->
+                    {% if fighter1.notable_fights %}
+                    <div class="mt-3">
+                        <h6><i class="fas fa-trophy me-1"></i>Notable Fights</h6>
+                        <small class="text-muted">{{ fighter1.notable_fights[:200] }}{% if fighter1.notable_fights|length > 200 %}...{% endif %}</small>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- VS Badge -->
+        <div class="col-md-2 d-flex align-items-center justify-content-center">
+            <div class="text-center">
+                <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto" 
+                     style="width: 80px; height: 80px; background: linear-gradient(135deg, #1a1a2e, #16213e); box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+                    <span class="text-white fw-bold" style="font-size: 1.5rem;">VS</span>
+                </div>
+                
+                <!-- Matchup Analysis -->
+                <div class="mt-4">
+                    <h6 class="text-muted">Matchup Notes</h6>
+                    {% if fighter1.weight_class != fighter2.weight_class %}
+                    <span class="badge bg-warning text-dark mb-1">Different Weight Classes</span><br>
+                    {% endif %}
+                    
+                    {% set f1_styles = fighter1.fighting_style.lower() if fighter1.fighting_style else '' %}
+                    {% set f2_styles = fighter2.fighting_style.lower() if fighter2.fighting_style else '' %}
+                    
+                    {% if 'striking' in f1_styles and 'grappling' in f2_styles %}
+                    <span class="badge bg-info mb-1">Striker vs Grappler</span><br>
+                    {% elif 'grappling' in f1_styles and 'striking' in f2_styles %}
+                    <span class="badge bg-info mb-1">Grappler vs Striker</span><br>
+                    {% elif 'wrestling' in f1_styles and 'bjj' in f2_styles %}
+                    <span class="badge bg-info mb-1">Wrestler vs BJJ</span><br>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Fighter 2 -->
+        <div class="col-md-5">
+            <div class="card h-100" style="border-left: 4px solid #4facfe;">
+                <div class="card-header text-center" style="background: linear-gradient(135deg, #4facfe, #00f2fe); color: white;">
+                    <h4 class="mb-0">
+                        {{ fighter2.name }}
+                        {% if fighter2.nickname %}<br><small>"{{ fighter2.nickname }}"</small>{% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Record -->
+                    <div class="text-center mb-4">
+                        <h2 class="mb-0" style="color: #4facfe;">{{ fighter2.record or 'N/A' }}</h2>
+                        <small class="text-muted">Record (W-L-D)</small>
+                    </div>
+
+                    <!-- Stats Table -->
+                    <table class="table table-sm">
+                        <tr>
+                            <td><strong>Weight Class</strong></td>
+                            <td class="text-end">{{ fighter2.weight_class }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Fighting Style</strong></td>
+                            <td class="text-end">{{ fighter2.fighting_style or 'Unknown' }}</td>
+                        </tr>
+                    </table>
+
+                    <!-- Strengths -->
+                    <div class="mt-3">
+                        <h6 class="text-success"><i class="fas fa-arrow-up me-1"></i>Strengths</h6>
+                        {% if fighter2.strengths %}
+                        <div class="d-flex flex-wrap gap-1">
+                            {% for strength in fighter2.strengths.split(',') %}
+                            <span class="badge bg-success">{{ strength.strip() }}</span>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <span class="text-muted">No data</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Weaknesses -->
+                    <div class="mt-3">
+                        <h6 class="text-danger"><i class="fas fa-arrow-down me-1"></i>Weaknesses</h6>
+                        {% if fighter2.weaknesses %}
+                        <div class="d-flex flex-wrap gap-1">
+                            {% for weakness in fighter2.weaknesses.split(',') %}
+                            <span class="badge bg-danger">{{ weakness.strip() }}</span>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <span class="text-muted">No data</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Notable Fights -->
+                    {% if fighter2.notable_fights %}
+                    <div class="mt-3">
+                        <h6><i class="fas fa-trophy me-1"></i>Notable Fights</h6>
+                        <small class="text-muted">{{ fighter2.notable_fights[:200] }}{% if fighter2.notable_fights|length > 200 %}...{% endif %}</small>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advantage Analysis -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-bar me-2"></i>Advantage Breakdown</h5>
+                </div>
+                <div class="card-body">
+                    {% set f1_wins = (fighter1.record.split('-')[0]|int) if fighter1.record else 0 %}
+                    {% set f1_losses = (fighter1.record.split('-')[1]|int) if fighter1.record and fighter1.record.split('-')|length > 1 else 0 %}
+                    {% set f2_wins = (fighter2.record.split('-')[0]|int) if fighter2.record else 0 %}
+                    {% set f2_losses = (fighter2.record.split('-')[1]|int) if fighter2.record and fighter2.record.split('-')|length > 1 else 0 %}
+                    
+                    {% set f1_total = f1_wins + f1_losses %}
+                    {% set f2_total = f2_wins + f2_losses %}
+                    {% set f1_winrate = (f1_wins / f1_total * 100) if f1_total > 0 else 0 %}
+                    {% set f2_winrate = (f2_wins / f2_total * 100) if f2_total > 0 else 0 %}
+                    
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <h6>Win Rate</h6>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="h4" style="color: #e94560;">{{ "%.0f"|format(f1_winrate) }}%</span>
+                                </div>
+                                <div class="flex-grow-1 mx-3">
+                                    <div class="progress" style="height: 10px;">
+                                        <div class="progress-bar" role="progressbar" 
+                                             style="width: {{ f1_winrate }}%; background: #e94560;"></div>
+                                    </div>
+                                    <div class="progress mt-1" style="height: 10px;">
+                                        <div class="progress-bar" role="progressbar" 
+                                             style="width: {{ f2_winrate }}%; background: #4facfe;"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <span class="h4" style="color: #4facfe;">{{ "%.0f"|format(f2_winrate) }}%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 text-center">
+                            <h6>Experience (Total Fights)</h6>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="h4" style="color: #e94560;">{{ f1_total }}</span>
+                                <span class="text-muted">vs</span>
+                                <span class="h4" style="color: #4facfe;">{{ f2_total }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 text-center">
+                            <h6>Wins</h6>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="h4" style="color: #e94560;">{{ f1_wins }}</span>
+                                <span class="text-muted">vs</span>
+                                <span class="h4" style="color: #4facfe;">{{ f2_wins }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <a href="{{ url_for('training.game_plan', fighter_id=fighter1.id) }}" class="btn btn-outline-danger me-2">
+                <i class="fas fa-chess me-1"></i>Game Plan vs {{ fighter1.name.split()[0] }}
+            </a>
+            <a href="{{ url_for('training.game_plan', fighter_id=fighter2.id) }}" class="btn btn-outline-primary">
+                <i class="fas fa-chess me-1"></i>Game Plan vs {{ fighter2.name.split()[0] }}
+            </a>
+        </div>
+    </div>
+    {% else %}
+    <!-- No fighters selected yet -->
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-info text-center">
+                <i class="fas fa-info-circle me-2"></i>
+                Select two fighters above to compare their stats, strengths, and weaknesses side-by-side.
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

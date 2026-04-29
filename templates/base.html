@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}FPMS - Fighter Performance Management System{% endblock %}</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <style>
+        .global-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 16px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15), 0 6px 20px rgba(0,0,0,0.1);
+            z-index: 9999;
+            min-width: 350px;
+            max-width: 380px;
+            opacity: 0;
+            transform: translateX(100%) scale(0.9) rotate(-2deg);
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border-left: 5px solid #007bff;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.3);
+            overflow: hidden;
+        }
+
+        .global-notification.show {
+            opacity: 1;
+            transform: translateX(0) scale(1) rotate(0deg);
+        }
+
+        .notification-content {
+            flex: 1;
+            padding: 0;
+            position: static;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .notification-content strong {
+            color: #007bff;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+            margin: 0;
+        }
+
+        .notification-content p {
+            margin: 0;
+            color: #495057;
+            font-size: 14px;
+            line-height: 1.4;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+
+        .notification-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(108, 117, 125, 0.08);
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+
+        .notification-close:hover {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            transform: scale(1.1) rotate(90deg);
+        }
+
+        .notification-wrapper {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 20px 24px;
+        }
+
+        .notification-icon {
+            flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .notification-content {
+            flex: 1;
+            padding: 0;
+            position: static;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        /* Add a subtle pulse animation */
+        @keyframes notificationPulse {
+            0% { box-shadow: 0 12px 40px rgba(0,0,0,0.15), 0 6px 20px rgba(0,0,0,0.1); }
+            50% { box-shadow: 0 16px 50px rgba(0,123,255,0.2), 0 8px 25px rgba(0,0,0,0.12); }
+            100% { box-shadow: 0 12px 40px rgba(0,0,0,0.15), 0 6px 20px rgba(0,0,0,0.1); }
+        }
+
+        .global-notification.show {
+            animation: notificationPulse 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); box-shadow: 0 4px 20px rgba(0,0,0,0.3); padding: 0.5rem 1rem;">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('main.dashboard') }}" style="font-weight: 700; font-size: 1.4rem;">
+                <img src="{{ url_for('static', filename='images/mma-glove.png') }}" alt="FPMS Logo" style="width: 60px; height: 60px; margin-right: 8px; object-fit: contain; vertical-align: middle;">
+                <span style="background: linear-gradient(135deg, #e94560, #ff6b6b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 60px;">FPMS</span>
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" style="padding: 8px 12px;">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                {% if current_user.is_authenticated %}
+                <ul class="navbar-nav me-auto">
+                    <!-- Main Navigation -->
+                    <li class="nav-item">
+                        <a class="nav-link px-3" href="{{ url_for('main.dashboard') }}" style="transition: all 0.3s ease;">
+                            <i class="fas fa-home me-1"></i> Home
+                        </a>
+                    </li>
+                    
+                    <!-- Training Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle px-3" href="#" id="trainingDropdown" role="button" data-bs-toggle="dropdown" style="transition: all 0.3s ease;">
+                            <i class="fas fa-dumbbell me-1"></i> Training
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark" style="background: #1a1a2e; border: 1px solid rgba(233,69,96,0.3);">
+                            <li><a class="dropdown-item" href="{{ url_for('training.camp_planner') }}"><i class="fas fa-calendar-alt me-2 text-info"></i> Camp Planner</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('training.view_camp_plans') }}"><i class="fas fa-list me-2 text-info"></i> My Camp Plans</a></li>
+                            <li><hr class="dropdown-divider" style="border-color: rgba(255,255,255,0.1);"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('training.game_plan') }}"><i class="fas fa-chess me-2 text-warning"></i> Game Plan</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('training.view_game_plans') }}"><i class="fas fa-list-alt me-2 text-warning"></i> My Game Plans</a></li>
+                            <li><hr class="dropdown-divider" style="border-color: rgba(255,255,255,0.1);"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('training.weight_tracker') }}"><i class="fas fa-weight me-2 text-success"></i> Weight Tracker</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('training.risk_readiness') }}"><i class="fas fa-shield-alt me-2 text-danger"></i> Risk & Readiness</a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- Community Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle px-3" href="#" id="communityDropdown" role="button" data-bs-toggle="dropdown" style="transition: all 0.3s ease;">
+                            <i class="fas fa-users me-1"></i> Community
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark" style="background: #1a1a2e; border: 1px solid rgba(233,69,96,0.3);">
+                            <li><a class="dropdown-item" href="{{ url_for('social.friends') }}"><i class="fas fa-user-friends me-2 text-primary"></i> Friends</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('social.chat_page') }}"><i class="fas fa-comments me-2 text-success"></i> Messages <span id="nav-unread-badge" class="badge bg-danger ms-1" style="display: none;"></span></a></li>
+                            <li><hr class="dropdown-divider" style="border-color: rgba(255,255,255,0.1);"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('sparring.sparring_dashboard') }}"><i class="fas fa-handshake me-2 text-warning"></i> Find Sparring Partners</a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- Fighters -->
+                    <li class="nav-item">
+                        <a class="nav-link px-3" href="{{ url_for('fighters.fighters') }}" style="transition: all 0.3s ease;">
+                            <i class="fas fa-fist-raised me-1"></i> Fighters
+                        </a>
+                    </li>
+                    
+                    <!-- Events - Highlighted -->
+                    <li class="nav-item">
+                        <a class="nav-link px-3" href="{{ url_for('events.events') }}" style="transition: all 0.3s ease;">
+                            <i class="fas fa-trophy me-1" style="color: #ffd700;"></i> Events
+                        </a>
+                    </li>
+                    
+                    <!-- Admin - Only for admins -->
+                    {% if current_user.is_admin %}
+                    <li class="nav-item">
+                        <a class="nav-link px-3" href="{{ url_for('events.admin_events') }}" style="transition: all 0.3s ease;">
+                            <i class="fas fa-shield-alt me-1 text-danger"></i> Admin
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+                
+                <!-- Right side -->
+                <ul class="navbar-nav align-items-center">
+                    <li class="nav-item me-2">
+                        <a class="nav-link px-3 d-flex align-items-center" href="{{ url_for('training.profile') }}" style="transition: all 0.3s ease;">
+                            {% if current_user.profile_picture %}
+                            <img src="{{ url_for('static', filename=current_user.profile_picture) }}" 
+                                 alt="{{ current_user.username }}" 
+                                 style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; margin-right: 10px; border: 2px solid #e94560;">
+                            {% else %}
+                            <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #e94560, #ff6b6b); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 10px;">
+                                <i class="fas fa-user" style="font-size: 14px; color: white;"></i>
+                            </div>
+                            {% endif %}
+                            <span>{{ current_user.username }}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-3" href="{{ url_for('auth.logout') }}" style="background: rgba(220,53,69,0.2); border-radius: 8px; transition: all 0.3s ease;">
+                            <i class="fas fa-sign-out-alt me-1"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+                {% else %}
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item me-2">
+                        <a class="nav-link px-4" href="{{ url_for('auth.login') }}" style="transition: all 0.3s ease;">
+                            <i class="fas fa-sign-in-alt me-1"></i> Login
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-4" href="{{ url_for('auth.signup') }}" style="background: linear-gradient(135deg, #e94560, #ff6b6b); border-radius: 8px; font-weight: 600; transition: all 0.3s ease;">
+                            <i class="fas fa-user-plus me-1"></i> Sign Up
+                        </a>
+                    </li>
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-dark text-light mt-5 py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Fighter Performance Management System</h5>
+                    <p>Professional training and performance tracking for combat sports athletes.</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <p>&copy; 2024 FPMS. All rights reserved.</p>
+                </div>
+            </div>
+            <hr>
+            <div class="text-center">
+                <small class="text-muted">
+                    <strong>Disclaimer:</strong> This system is a decision-support tool and does not provide medical advice. Always consult with qualified professionals for health and training decisions.
+                </small>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Socket.IO -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% if current_user.is_authenticated %}
+    <script>
+
+
+        // Initialize Socket.IO for global notifications
+        const socket = io();
+
+        // Debug: Log connection status
+        socket.on('connect', function() {
+            console.log('=== SOCKET.IO CONNECTED ===');
+            console.log('Socket ID:', socket.id);
+        });
+
+        socket.on('disconnect', function() {
+            console.log('=== SOCKET.IO DISCONNECTED ===');
+        });
+
+        // Join user's notification room
+        socket.emit('join', { username: '{{ current_user.username }}', room: 'user_{{ current_user.id }}' });
+        console.log('=== EMITTED JOIN EVENT ===');
+        console.log('Username:', '{{ current_user.username }}');
+        console.log('Room:', 'user_{{ current_user.id }}');
+
+        // Listen for join confirmation
+        socket.on('status', function(data) {
+            console.log('=== RECEIVED STATUS EVENT ===');
+            console.log('Status message:', data.msg);
+        });
+
+        // Handle incoming messages for global notifications
+        socket.on('receive_message', function(data) {
+            // Show global notification popup
+            showGlobalNotification(data.sender_username || 'Someone', data.message);
+
+            // Update unread count in navigation or dashboard if visible
+            updateGlobalUnreadCount(data.sender_id);
+
+            // Update last message in recent chats section on dashboard
+            updateRecentChatsLastMessage(data.sender_id, data.message, data.timestamp);
+        });
+
+        // Handle unread count updates for dashboard
+        socket.on('unread_count_update', function(data) {
+            console.log('=== RECEIVED UNREAD COUNT UPDATE ===');
+            console.log('Data:', data);
+            console.log('Unread counts:', data.unread_counts);
+            console.log('New message from:', data.new_message_from);
+            updateUnreadCounts(data.unread_counts, data.new_message_from);
+        });
+
+        function showGlobalNotification(sender, message) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = 'global-notification';
+            notification.innerHTML = `
+                <div class="notification-wrapper">
+                    <div class="notification-icon">
+                        <i class="fas fa-comment"></i>
+                    </div>
+                    <div class="notification-content">
+                        <strong>New message from ${sender}</strong>
+                        <p>${message.length > 50 ? message.substring(0, 50) + '...' : message}</p>
+                    </div>
+                </div>
+                <button class="notification-close">&times;</button>
+            `;
+
+            // Add to page
+            document.body.appendChild(notification);
+
+            // Show notification
+            setTimeout(() => notification.classList.add('show'), 100);
+
+            // Auto-hide after 6 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 400);
+            }, 6000);
+
+            // Close button functionality
+            notification.querySelector('.notification-close').addEventListener('click', () => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 400);
+            });
+        }
+
+
+
+        function updateGlobalUnreadCount(senderId) {
+            // This could update a global unread count indicator in the navigation
+            // For now, we'll just log it
+            console.log('New message from sender:', senderId);
+        }
+
+        function updateRecentChatsLastMessage(senderId, message, timestamp) {
+            // Update last message in recent chats section on dashboard
+            const chatItems = document.querySelectorAll('.d-flex.align-items-center.mb-3.p-2');
+
+            chatItems.forEach(item => {
+                const chatLink = item.querySelector('a[href*="chat"]');
+                if (chatLink) {
+                    const friendId = chatLink.href.split('/').pop(); // Extract friend ID from URL
+
+                    // Check if this chat item matches the sender
+                    if (friendId == senderId) {
+                        // Update the last message text
+                        const messageElement = item.querySelector('small.text-muted');
+                        if (messageElement) {
+                            const truncatedMessage = message.length > 50 ? message.substring(0, 50) + '...' : message;
+                            messageElement.textContent = truncatedMessage;
+                        }
+
+                        // Update the timestamp
+                        const timestampElement = item.querySelectorAll('small.text-muted')[1];
+                        if (timestampElement && timestamp) {
+                            const date = new Date(timestamp);
+                            const formattedTime = date.toLocaleString('en-US', {
+                                month: '2-digit',
+                                day: '2-digit',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: false
+                            });
+                            timestampElement.textContent = formattedTime;
+                        }
+
+                        // Move this chat item to the top of the list
+                        const chatContainer = item.parentNode;
+                        if (chatContainer && chatContainer.children.length > 1) {
+                            chatContainer.insertBefore(item, chatContainer.firstElementChild);
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateUnreadCounts(unreadCounts, newMessageFrom) {
+            // Calculate total unread messages for navbar badge
+            let totalUnread = 0;
+            for (const friendId in unreadCounts) {
+                totalUnread += unreadCounts[friendId];
+            }
+
+            // Update global navbar badge (check both possible IDs)
+            const globalBadge = document.getElementById('global-unread-badge') || document.getElementById('nav-unread-badge');
+            if (globalBadge) {
+                if (totalUnread > 0) {
+                    globalBadge.textContent = totalUnread > 99 ? '99+' : totalUnread;
+                    globalBadge.style.display = 'inline-block';
+                } else {
+                    globalBadge.style.display = 'none';
+                }
+            }
+
+            // Update unread counts in the Recent Chats section (if on dashboard page)
+            const chatItems = document.querySelectorAll('.d-flex.align-items-center.mb-3.p-2');
+
+            chatItems.forEach(item => {
+                const chatLink = item.querySelector('a[href*="chat"]');
+                if (chatLink) {
+                    const friendId = chatLink.href.split('/').pop(); // Extract friend ID from URL
+
+                    // Only update if this friend has unread messages in the update data
+                    if (unreadCounts.hasOwnProperty(friendId)) {
+                        const unreadCount = unreadCounts[friendId];
+
+                        // Update or add unread badge
+                        let badge = item.querySelector('.badge.bg-danger');
+                        if (unreadCount > 0) {
+                            if (!badge) {
+                                // Create new badge
+                                badge = document.createElement('span');
+                                badge.className = 'badge bg-danger ms-2';
+                                const strongElement = item.querySelector('strong');
+                                if (strongElement) {
+                                    strongElement.parentNode.insertBefore(badge, strongElement.nextSibling);
+                                }
+                            }
+                            badge.textContent = unreadCount;
+
+                            // Add border highlighting for chats with unread messages
+                            item.classList.add('border-primary');
+                        } else {
+                            // Remove badge if no unread messages
+                            if (badge) {
+                                badge.remove();
+                            }
+                            // Remove border highlighting
+                            item.classList.remove('border-primary');
+                        }
+                    }
+                    // If friend not in update data, leave current state unchanged
+                }
+            });
+        }
+    </script>
+    {% endif %}
+</body>
+</html>

@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Weight Tracker - FPMS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h2>Log Weight</h2>
+            </div>
+            <div class="card-body">
+                {% if form.weight.errors %}
+                    <div class="alert alert-danger">
+                        <strong>Error:</strong> {{ form.weight.errors[0] }}
+                    </div>
+                {% endif %}
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ form.weight.label(class="form-label") }}
+                        {{ form.weight(class="form-control") }}
+                    </div>
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Weight Trend & Risks</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Current Trend:</strong> <span class="{% if weight_trend == 'Decreasing' %}text-success{% elif weight_trend == 'Increasing' %}text-danger{% else %}text-muted{% endif %}">{{ weight_trend }}</span></p>
+                <p><strong>Risk Level:</strong> <span class="{% if risk_level == 'Low' %}text-success{% elif risk_level == 'Medium' %}text-warning{% else %}text-danger{% endif %}">{{ risk_level }}</span></p>
+                {% if score is not none %}
+                <p><strong>Readiness Score:</strong> <span class="{% if score >= 70 %}text-success{% elif score >= 30 %}text-warning{% else %}text-danger{% endif %}">{{ score }}/100</span></p>
+                {% endif %}
+                {% if risks %}
+                    <p><strong>Risks:</strong></p>
+                    <ul class="list-group">
+                        {% for risk in risks %}
+                            <li class="list-group-item list-group-item-danger">{{ risk }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-success">No significant risks detected.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>Weight History</h5>
+            </div>
+            <div class="card-body">
+                {% if logs %}
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Weight (lbs)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in logs %}
+                                <tr>
+                                    <td>{{ log.date.strftime('%Y-%m-%d') }}</td>
+                                    <td>{{ "%.1f"|format(log.weight) }}</td>
+                                    <td>
+                                        <form method="POST" action="{{ url_for('training.delete_weight_log', log_id=log.id) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this weight log?')">
+                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No weight logs yet. Start logging your weight to track progress!</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

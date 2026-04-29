@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Risk & Readiness - FPMS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card text-center">
+            <div class="card-header">
+                <h2>Readiness Score</h2>
+            </div>
+            <div class="card-body">
+                <div class="display-1 {% if readiness_level == 'High' %}text-success{% elif readiness_level == 'Medium' %}text-warning{% else %}text-danger{% endif %}">{{ score }}/100</div>
+                <h4 class="{% if readiness_level == 'High' %}text-success{% elif readiness_level == 'Medium' %}text-warning{% else %}text-danger{% endif %}">{{ readiness_level }} Readiness</h4>
+                <p>Risk Level: <span class="{% if risk_level == 'Low' %}text-success{% elif risk_level == 'Medium' %}text-warning{% else %}text-danger{% endif %}">{{ risk_level }}</span></p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Contributing Factors</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% for factor in factors %}
+                        <li class="list-group-item">{{ factor }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="alert alert-warning mt-4">
+    <strong>Important:</strong> This assessment is for informational purposes only and should not replace professional medical or coaching advice.
+</div>
+{% endblock %}

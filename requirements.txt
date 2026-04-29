@@ -1,0 +1,10 @@
+Flask==2.3.3
+Werkzeug==2.3.7
+SQLAlchemy==1.4.46
+Flask-SQLAlchemy==2.5.1
+Flask-Login==0.6.3
+WTForms==3.0.1
+Flask-WTF==1.2.1
+Bootstrap-Flask==1.8.0
+Flask-SocketIO==5.6.1
+email-validator==2.3.0

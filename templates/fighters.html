@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Fighter Database - FPMS{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4><i class="fas fa-users me-2"></i>Fighter Database</h4>
+                <a href="{{ url_for('fighters.compare_fighters') }}" class="btn btn-primary">
+                    <i class="fas fa-balance-scale me-2"></i>Compare Fighters
+                </a>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-search"></i> Search & Filter</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Search and Filter Form -->
+                    <form method="GET" class="mb-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="search" class="form-label">Search Fighters</label>
+                                <input type="text" class="form-control" id="search" name="search" value="{{ request.args.get('search', '') }}" placeholder="Search by name...">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="weight_class" class="form-label">Weight Class</label>
+                                <select class="form-select" id="weight_class" name="weight_class">
+                                    <option value="">All Weight Classes</option>
+                                    {% for wc in weight_classes %}
+                                    <option value="{{ wc }}" {% if request.args.get('weight_class') == wc %}selected{% endif %}>{{ wc }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="submit" class="btn btn-outline-primary w-100">
+                                    <i class="fas fa-search"></i> Filter
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Fighters Grid -->
+                    {% if fighters %}
+                    <div class="row">
+                        {% for fighter in fighters %}
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        {{ fighter.name }}
+                                        {% if fighter.nickname %}
+                                        <small class="text-muted">({{ fighter.nickname }})</small>
+                                        {% endif %}
+                                    </h5>
+                                    <p class="card-text">
+                                        <strong>Weight Class:</strong> {{ fighter.weight_class }}<br>
+                                        <strong>Record:</strong> {{ fighter.record }}<br>
+                                        <strong>Style:</strong> {{ fighter.fighting_style }}
+                                    </p>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="btn-group w-100">
+                                        <a href="{{ url_for('fighters.fighter_detail', fighter_id=fighter.id) }}" class="btn btn-outline-primary">
+                                            <i class="fas fa-eye"></i> View Details
+                                        </a>
+                                        <a href="{{ url_for('fighters.use_fighter', fighter_id=fighter.id) }}" class="btn btn-outline-success">
+                                            <i class="fas fa-play"></i> Use for Game Plan
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">No fighters found</h4>
+                        <p class="text-muted">Try adjusting your search criteria.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

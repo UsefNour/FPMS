@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Assess Sparring Session{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0">Assess Sparring Session</h2>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h5>Session Details</h5>
+                        <p><strong>Partner:</strong> {{ assessed_user.username }}</p>
+                        <p><strong>Date:</strong> {{ session.session_date.strftime('%Y-%m-%d %I:%M %p') }}</p>
+                        <p><strong>Location:</strong> {{ session.location }}</p>
+                        <p><strong>Duration:</strong> {{ session.duration_minutes }} minutes</p>
+                        {% if session.notes %}
+                            <p><strong>Notes:</strong> {{ session.notes }}</p>
+                        {% endif %}
+                    </div>
+
+                    <p class="mb-4">Please provide an honest assessment of {{ assessed_user.username }}'s performance. This helps maintain the integrity of the sparring community.</p>
+
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-3">
+                            {{ form.skill_rating.label(class="form-label") }}
+                            {{ form.skill_rating(class="form-control") }}
+                            {% if form.skill_rating.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.skill_rating.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Rate their overall skill level (1-10)</div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.assessment_notes.label(class="form-label") }}
+                            {{ form.assessment_notes(class="form-control", rows=4) }}
+                            {% if form.assessment_notes.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.assessment_notes.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Provide detailed feedback about their strengths, weaknesses, and areas for improvement</div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            {{ form.submit(class="btn btn-primary") }}
+                            <a href="{{ url_for('sparring.sparring_dashboard') }}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

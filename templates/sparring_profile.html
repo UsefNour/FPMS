@@ -1,0 +1,304 @@
+{% extends "base.html" %}
+
+{% block title %}Sparring Profile{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0"><i class="fas fa-user-friends me-2"></i>Sparring Profile</h2>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Complete your sparring profile to find compatible training partners in your area.</p>
+
+                    <form method="POST" id="sparringProfileForm">
+                        {{ form.hidden_tag() }}
+
+                        <!-- Location Section -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="fas fa-map-marker-alt me-2"></i>Location</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    {{ form.location.label(class="form-label") }}
+                                    <div class="input-group">
+                                        {{ form.location(class="form-control", id="locationInput", placeholder="e.g., Los Angeles, CA, USA") }}
+                                        <button type="button" class="btn btn-outline-secondary" id="detectLocationBtn" title="Use my current location">
+                                            <i class="fas fa-crosshairs"></i>
+                                        </button>
+                                    </div>
+                                    {% if form.location.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.location.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">Enter your city and state/country, or click the button to auto-detect</div>
+                                </div>
+
+                                <!-- Location Status -->
+                                <div id="locationStatus" class="alert alert-info d-none">
+                                    <i class="fas fa-spinner fa-spin me-2"></i>
+                                    <span id="locationStatusText">Detecting location...</span>
+                                </div>
+
+                                <!-- Hidden fields for coordinates -->
+                                {{ form.latitude(type="hidden", id="latitudeInput") }}
+                                {{ form.longitude(type="hidden", id="longitudeInput") }}
+
+                                <!-- Show detected coordinates -->
+                                <div id="coordsDisplay" class="small text-muted {% if not form.latitude.data %}d-none{% endif %}">
+                                    <i class="fas fa-check-circle text-success me-1"></i>
+                                    Coordinates: <span id="coordsText">{% if form.latitude.data %}{{ form.latitude.data }}, {{ form.longitude.data }}{% endif %}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Skills Section -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="fas fa-fist-raised me-2"></i>Skills & Style</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        {{ form.skill_level.label(class="form-label") }}
+                                        {{ form.skill_level(class="form-select") }}
+                                        {% if form.skill_level.errors %}
+                                            <div class="text-danger">
+                                                {% for error in form.skill_level.errors %}
+                                                    <small>{{ error }}</small>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        {{ form.preferred_styles.label(class="form-label") }}
+                                        {{ form.preferred_styles(class="form-select") }}
+                                        {% if form.preferred_styles.errors %}
+                                            <div class="text-danger">
+                                                {% for error in form.preferred_styles.errors %}
+                                                    <small>{{ error }}</small>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    {{ form.self_skill_rating.label(class="form-label") }}
+                                    <div class="d-flex align-items-center">
+                                        <input type="range" class="form-range me-3" min="1" max="10" step="1" id="skillRatingSlider" value="{{ form.self_skill_rating.data or 5 }}">
+                                        {{ form.self_skill_rating(class="form-control", style="width: 80px;", readonly=true) }}
+                                    </div>
+                                    {% if form.self_skill_rating.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.self_skill_rating.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">Rate your skill (1-10). Your sparring partners will validate this.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Availability Section -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Availability & Preferences</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    {{ form.availability.label(class="form-label") }}
+                                    {{ form.availability(class="form-control", rows=3, placeholder="e.g., Mon-Fri 6-8PM, Sat 10AM-12PM") }}
+                                    {% if form.availability.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.availability.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    {{ form.max_distance.label(class="form-label") }}
+                                    <div class="input-group">
+                                        {{ form.max_distance(class="form-control") }}
+                                        <span class="input-group-text">miles</span>
+                                    </div>
+                                    {% if form.max_distance.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.max_distance.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">How far are you willing to travel to meet sparring partners?</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
+                            <a href="{{ url_for('sparring.sparring_dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const locationInput = document.getElementById('locationInput');
+    const latitudeInput = document.getElementById('latitudeInput');
+    const longitudeInput = document.getElementById('longitudeInput');
+    const detectLocationBtn = document.getElementById('detectLocationBtn');
+    const locationStatus = document.getElementById('locationStatus');
+    const locationStatusText = document.getElementById('locationStatusText');
+    const coordsDisplay = document.getElementById('coordsDisplay');
+    const coordsText = document.getElementById('coordsText');
+    const skillRatingSlider = document.getElementById('skillRatingSlider');
+    const selfSkillRating = document.getElementById('self_skill_rating');
+
+    // Sync slider with input
+    skillRatingSlider.addEventListener('input', function() {
+        selfSkillRating.value = this.value;
+    });
+
+    // Geocode location when user finishes typing
+    let geocodeTimeout;
+    locationInput.addEventListener('input', function() {
+        clearTimeout(geocodeTimeout);
+        geocodeTimeout = setTimeout(() => {
+            if (locationInput.value.length > 3) {
+                geocodeAddress(locationInput.value);
+            }
+        }, 1000); // Wait 1 second after user stops typing
+    });
+
+    // Detect current location button
+    detectLocationBtn.addEventListener('click', function() {
+        if ('geolocation' in navigator) {
+            showLocationStatus('Detecting your location...', 'info');
+            
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    
+                    latitudeInput.value = lat.toFixed(6);
+                    longitudeInput.value = lon.toFixed(6);
+                    
+                    // Reverse geocode to get address
+                    reverseGeocode(lat, lon);
+                },
+                function(error) {
+                    showLocationStatus('Could not detect location. Please enter manually.', 'warning');
+                    console.error('Geolocation error:', error);
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
+        } else {
+            showLocationStatus('Geolocation is not supported by your browser.', 'warning');
+        }
+    });
+
+    function geocodeAddress(address) {
+        showLocationStatus('Looking up location...', 'info');
+        
+        // Using OpenStreetMap Nominatim API (free, no API key required)
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`, {
+            headers: {
+                'User-Agent': 'FPMS-SparringMatcher/1.0'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.length > 0) {
+                const result = data[0];
+                latitudeInput.value = parseFloat(result.lat).toFixed(6);
+                longitudeInput.value = parseFloat(result.lon).toFixed(6);
+                
+                showCoordsSuccess(result.lat, result.lon);
+                showLocationStatus(`Location found: ${result.display_name}`, 'success');
+            } else {
+                showLocationStatus('Location not found. Try a more specific address.', 'warning');
+            }
+        })
+        .catch(error => {
+            console.error('Geocoding error:', error);
+            showLocationStatus('Error looking up location. Coordinates are optional.', 'warning');
+        });
+    }
+
+    function reverseGeocode(lat, lon) {
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`, {
+            headers: {
+                'User-Agent': 'FPMS-SparringMatcher/1.0'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.address) {
+                const addr = data.address;
+                let locationStr = '';
+                
+                if (addr.city || addr.town || addr.village) {
+                    locationStr = addr.city || addr.town || addr.village;
+                }
+                if (addr.state) {
+                    locationStr += locationStr ? ', ' + addr.state : addr.state;
+                }
+                if (addr.country) {
+                    locationStr += locationStr ? ', ' + addr.country : addr.country;
+                }
+                
+                if (locationStr) {
+                    locationInput.value = locationStr;
+                }
+                
+                showCoordsSuccess(lat, lon);
+                showLocationStatus('Location detected successfully!', 'success');
+            }
+        })
+        .catch(error => {
+            console.error('Reverse geocoding error:', error);
+            showCoordsSuccess(lat, lon);
+            showLocationStatus('Location detected. Please enter city name manually.', 'info');
+        });
+    }
+
+    function showLocationStatus(message, type) {
+        locationStatus.classList.remove('d-none', 'alert-info', 'alert-success', 'alert-warning', 'alert-danger');
+        locationStatus.classList.add('alert-' + type);
+        
+        let icon = 'fa-spinner fa-spin';
+        if (type === 'success') icon = 'fa-check-circle';
+        else if (type === 'warning') icon = 'fa-exclamation-triangle';
+        else if (type === 'danger') icon = 'fa-times-circle';
+        
+        locationStatus.innerHTML = `<i class="fas ${icon} me-2"></i>${message}`;
+        
+        // Auto-hide success/warning messages after 5 seconds
+        if (type === 'success' || type === 'warning') {
+            setTimeout(() => {
+                locationStatus.classList.add('d-none');
+            }, 5000);
+        }
+    }
+
+    function showCoordsSuccess(lat, lon) {
+        coordsDisplay.classList.remove('d-none');
+        coordsText.textContent = `${parseFloat(lat).toFixed(4)}, ${parseFloat(lon).toFixed(4)}`;
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}My Game Plans{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-chess me-2"></i>My Game Plans</h2>
+                <a href="{{ url_for('training.game_plan') }}" class="btn btn-primary"><i class="fas fa-plus me-2"></i>Create New Game Plan</a>
+            </div>
+
+            {% if game_plans %}
+                {% for plan in game_plans %}
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            {% if plan.opponent_name %}
+                            <h5 class="mb-0"><i class="fas fa-crosshairs me-2"></i>Game Plan vs {{ plan.opponent_name }}</h5>
+                            {% else %}
+                            <h5 class="mb-0"><i class="fas fa-gamepad me-2"></i>Game Plan #{{ plan.id }}</h5>
+                            {% endif %}
+                            <small class="text-muted">Created: {{ plan.created_at|strftime('%B %d, %Y') }}</small>
+                        </div>
+                        <form method="POST" action="{{ url_for('training.delete_game_plan', plan_id=plan.id) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this game plan?')">
+                            <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash me-1"></i>Delete</button>
+                        </form>
+                    </div>
+                    <div class="card-body">
+                        {% set plan_data = plan.round_objectives|load_json %}
+                        
+                        <!-- Opponent Analysis -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card border-success">
+                                    <div class="card-header bg-success text-white">
+                                        <h6 class="mb-0"><i class="fas fa-shield-alt me-2"></i>Opponent Strengths</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="mb-0">{{ plan.opponent_strengths }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-danger">
+                                    <div class="card-header bg-danger text-white">
+                                        <h6 class="mb-0"><i class="fas fa-crosshairs me-2"></i>Opponent Weaknesses</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="mb-0">{{ plan.opponent_weaknesses }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Preferred Range -->
+                        <div class="alert alert-primary mb-4">
+                            <h5 class="alert-heading"><i class="fas fa-bullseye me-2"></i>Preferred Range: {{ plan.preferred_range }}</h5>
+                            {% if plan_data.range_reason %}
+                                <p class="mb-0">{{ plan_data.range_reason }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Strategic Approach & Tactical Notes -->
+                        <div class="row mb-4">
+                            {% if plan_data.strategic_approach %}
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-primary text-white">
+                                        <h6 class="mb-0"><i class="fas fa-chess-knight me-2"></i>Strategic Approach</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="mb-0">
+                                            {% for approach in plan_data.strategic_approach %}
+                                                <li>{{ approach }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if plan_data.tactical_notes %}
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-warning">
+                                        <h6 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Tactical Notes</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        {% for note in plan_data.tactical_notes %}
+                                            <p class="mb-2">{{ note }}</p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Techniques & Avoidances -->
+                        <div class="row mb-4">
+                            {% if plan_data.techniques_to_drill %}
+                            <div class="col-md-6">
+                                <div class="card h-100 border-success">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0 text-success"><i class="fas fa-check-circle me-2"></i>Techniques to Drill</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-flex flex-wrap gap-2">
+                                            {% for technique in plan_data.techniques_to_drill %}
+                                                <span class="badge bg-success">{{ technique }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if plan_data.things_to_avoid %}
+                            <div class="col-md-6">
+                                <div class="card h-100 border-danger">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0 text-danger"><i class="fas fa-times-circle me-2"></i>Things to Avoid</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-flex flex-wrap gap-2">
+                                            {% for avoid in plan_data.things_to_avoid %}
+                                                <span class="badge bg-danger">{{ avoid }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Round by Round Strategy -->
+                        {% if plan_data.round_objectives %}
+                        <div class="card">
+                            <div class="card-header bg-dark text-white">
+                                <h6 class="mb-0"><i class="fas fa-clock me-2"></i>Round-by-Round Strategy</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    {% for round_name, round_data in plan_data.round_objectives.items() %}
+                                    <div class="col-md-{% if plan_data.round_objectives|length <= 3 %}4{% else %}{% if loop.index <= 3 %}4{% else %}6{% endif %}{% endif %} mb-3">
+                                        <div class="card h-100 {% if loop.last %}border-warning{% endif %}">
+                                            <div class="card-header {% if loop.last %}bg-warning{% else %}bg-light{% endif %}">
+                                                <strong>{{ round_name }}</strong>
+                                            </div>
+                                            <div class="card-body">
+                                                {% if round_data is mapping %}
+                                                    <p class="mb-1"><strong>Goal:</strong> {{ round_data.objective }}</p>
+                                                    <p class="mb-1 small"><strong>Tactics:</strong> {{ round_data.tactics }}</p>
+                                                    <p class="mb-0 small text-muted"><strong>Target:</strong> {{ round_data.target }}</p>
+                                                {% else %}
+                                                    <p class="mb-0">{{ round_data }}</p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center mt-5">
+                    <i class="fas fa-chess fa-4x text-muted mb-3"></i>
+                    <h4>No game plans found</h4>
+                    <p>You haven't created any game plans yet.</p>
+                    <a href="{{ url_for('training.game_plan') }}" class="btn btn-primary"><i class="fas fa-plus me-2"></i>Create Your First Game Plan</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

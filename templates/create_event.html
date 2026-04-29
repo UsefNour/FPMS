@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if edit_mode %}Edit Event{% else %}Create Event{% endif %} - FPMS{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('events.events') }}">Events</a></li>
+                    <li class="breadcrumb-item active">{% if edit_mode %}Edit Event{% else %}Create Event{% endif %}</li>
+                </ol>
+            </nav>
+
+            <div class="card shadow">
+                <div class="card-header bg-gradient py-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <h3 class="text-white mb-0">
+                        <i class="fas fa-{% if edit_mode %}edit{% else %}plus-circle{% endif %} me-2"></i>
+                        {% if edit_mode %}Edit Event{% else %}Create New Event{% endif %}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" novalidate>
+                        {{ form.hidden_tag() }}
+
+                        <!-- Basic Info Section -->
+                        <div class="border-bottom pb-3 mb-4">
+                            <h5 class="text-primary mb-3"><i class="fas fa-info-circle me-2"></i>Basic Information</h5>
+                            
+                            <div class="mb-3">
+                                {{ form.name.label(class="form-label fw-semibold") }}
+                                {{ form.name(class="form-control form-control-lg", placeholder="e.g., Summer Throwdown MMA Championship") }}
+                                {% if form.name.errors %}
+                                <div class="text-danger small">{{ form.name.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form.description.label(class="form-label fw-semibold") }}
+                                {{ form.description(class="form-control", rows="4") }}
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form.event_type.label(class="form-label fw-semibold") }}
+                                    {{ form.event_type(class="form-select") }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form.rules.label(class="form-label fw-semibold") }}
+                                    {{ form.rules(class="form-select") }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Date & Time Section -->
+                        <div class="border-bottom pb-3 mb-4">
+                            <h5 class="text-primary mb-3"><i class="fas fa-calendar-alt me-2"></i>Date & Time</h5>
+                            
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    {{ form.date.label(class="form-label fw-semibold") }}
+                                    {{ form.date(class="form-control") }}
+                                    {% if form.date.errors %}
+                                    <div class="text-danger small">{{ form.date.errors[0] }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    {{ form.event_time.label(class="form-label fw-semibold") }}
+                                    {{ form.event_time(class="form-control") }}
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    {{ form.registration_deadline.label(class="form-label fw-semibold") }}
+                                    {{ form.registration_deadline(class="form-control") }}
+                                    <small class="text-muted">Optional</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Location Section -->
+                        <div class="border-bottom pb-3 mb-4">
+                            <h5 class="text-primary mb-3"><i class="fas fa-map-marker-alt me-2"></i>Location</h5>
+                            
+                            <div class="mb-3">
+                                {{ form.venue_name.label(class="form-label fw-semibold") }}
+                                {{ form.venue_name(class="form-control") }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form.location.label(class="form-label fw-semibold") }}
+                                {{ form.location(class="form-control") }}
+                                {% if form.location.errors %}
+                                <div class="text-danger small">{{ form.location.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    {{ form.city.label(class="form-label fw-semibold") }}
+                                    {{ form.city(class="form-control") }}
+                                    {% if form.city.errors %}
+                                    <div class="text-danger small">{{ form.city.errors[0] }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    {{ form.state.label(class="form-label fw-semibold") }}
+                                    {{ form.state(class="form-control") }}
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    {{ form.country.label(class="form-label fw-semibold") }}
+                                    {{ form.country(class="form-select") }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Competition Details Section -->
+                        <div class="border-bottom pb-3 mb-4">
+                            <h5 class="text-primary mb-3"><i class="fas fa-dumbbell me-2"></i>Competition Details</h5>
+                            
+                            <div class="mb-3">
+                                {{ form.weight_classes.label(class="form-label fw-semibold") }}
+                                <small class="text-muted d-block mb-2">Hold Ctrl/Cmd to select multiple</small>
+                                {{ form.weight_classes(class="form-select", size="6") }}
+                                {% if form.weight_classes.errors %}
+                                <div class="text-danger small">{{ form.weight_classes.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form.experience_levels.label(class="form-label fw-semibold") }}
+                                <small class="text-muted d-block mb-2">Hold Ctrl/Cmd to select multiple</small>
+                                {{ form.experience_levels(class="form-select", size="4") }}
+                                {% if form.experience_levels.errors %}
+                                <div class="text-danger small">{{ form.experience_levels.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form.entry_fee.label(class="form-label fw-semibold") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        {{ form.entry_fee(class="form-control") }}
+                                    </div>
+                                    <small class="text-muted">Leave 0 for free entry</small>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form.max_participants.label(class="form-label fw-semibold") }}
+                                    {{ form.max_participants(class="form-control") }}
+                                    <small class="text-muted">Optional - leave blank for no limit</small>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form.prize_info.label(class="form-label fw-semibold") }}
+                                {{ form.prize_info(class="form-control", rows="2") }}
+                            </div>
+                        </div>
+
+                        <!-- Contact Section -->
+                        <div class="mb-4">
+                            <h5 class="text-primary mb-3"><i class="fas fa-address-book me-2"></i>Contact Information</h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form.contact_email.label(class="form-label fw-semibold") }}
+                                    {{ form.contact_email(class="form-control", type="email") }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form.contact_phone.label(class="form-label fw-semibold") }}
+                                    {{ form.contact_phone(class="form-control") }}
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form.website.label(class="form-label fw-semibold") }}
+                                {{ form.website(class="form-control") }}
+                            </div>
+                        </div>
+
+                        <!-- Submit -->
+                        <div class="d-grid gap-2">
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
+                            <a href="{{ url_for('events.events') }}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Request Sparring Session{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0"><i class="fas fa-handshake me-2"></i>Request Sparring Session</h2>
+                </div>
+                <div class="card-body">
+                    <!-- Partner Info -->
+                    <div class="alert alert-info d-flex align-items-center mb-4">
+                        <i class="fas fa-user-circle fa-2x me-3"></i>
+                        <div>
+                            <strong>Requesting session with:</strong> {{ partner.username }}
+                            {% if partner.sparring_profile %}
+                                <br><small class="text-muted">
+                                    {{ partner.sparring_profile.skill_level }} • 
+                                    {{ partner.sparring_profile.preferred_styles }} • 
+                                    {{ partner.sparring_profile.location }}
+                                </small>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <form method="POST" id="sessionRequestForm">
+                        {{ form.hidden_tag() }}
+
+                        <!-- Hidden partner username field -->
+                        <input type="hidden" name="partner_username" value="{{ partner.username }}">
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.session_date.label(class="form-label") }}
+                                {{ form.session_date(class="form-control", min=today) }}
+                                {% if form.session_date.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.session_date.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                {{ form.session_time.label(class="form-label") }}
+                                <select class="form-select" name="session_time" id="session_time" required>
+                                    <option value="">Select time...</option>
+                                    <option value="6:00 AM">6:00 AM</option>
+                                    <option value="7:00 AM">7:00 AM</option>
+                                    <option value="8:00 AM">8:00 AM</option>
+                                    <option value="9:00 AM">9:00 AM</option>
+                                    <option value="10:00 AM">10:00 AM</option>
+                                    <option value="11:00 AM">11:00 AM</option>
+                                    <option value="12:00 PM">12:00 PM</option>
+                                    <option value="1:00 PM">1:00 PM</option>
+                                    <option value="2:00 PM">2:00 PM</option>
+                                    <option value="3:00 PM">3:00 PM</option>
+                                    <option value="4:00 PM">4:00 PM</option>
+                                    <option value="5:00 PM">5:00 PM</option>
+                                    <option value="6:00 PM">6:00 PM</option>
+                                    <option value="7:00 PM">7:00 PM</option>
+                                    <option value="8:00 PM">8:00 PM</option>
+                                    <option value="9:00 PM">9:00 PM</option>
+                                </select>
+                                {% if form.session_time.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.session_time.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.duration_minutes.label(class="form-label") }}
+                                <select class="form-select" name="duration_minutes" id="duration_minutes">
+                                    <option value="30">30 minutes</option>
+                                    <option value="45">45 minutes</option>
+                                    <option value="60" selected>60 minutes (1 hour)</option>
+                                    <option value="90">90 minutes (1.5 hours)</option>
+                                    <option value="120">120 minutes (2 hours)</option>
+                                </select>
+                                {% if form.duration_minutes.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.duration_minutes.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                {{ form.location.label(class="form-label") }}
+                                {{ form.location(class="form-control", placeholder="e.g., Main Street Boxing Gym") }}
+                                {% if form.location.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.location.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">Where will you meet for the session?</div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.notes.label(class="form-label") }}
+                            {{ form.notes(class="form-control", rows=3, placeholder="Any additional notes, goals, or requirements for this session...") }}
+                            {% if form.notes.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.notes.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
+                            <a href="{{ url_for('sparring.sparring_dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

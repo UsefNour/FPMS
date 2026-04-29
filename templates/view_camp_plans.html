@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}My Training Camp Plans{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-dumbbell me-2"></i>My Training Camp Plans</h2>
+                <a href="{{ url_for('training.camp_planner') }}" class="btn btn-primary"><i class="fas fa-plus-circle me-2"></i>Create New Camp Plan</a>
+            </div>
+
+            {% if camp_plans %}
+                {% for plan in camp_plans %}
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center bg-dark text-white">
+                        <div>
+                            <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Camp Plan vs {{ plan.opponent_name or 'Unknown Opponent' }}</h5>
+                            <small>Created: {{ plan.created_at|strftime('%B %d, %Y') }} | {{ plan.weeks_remaining }} weeks | {{ plan.fight_type }}</small>
+                        </div>
+                        <form method="POST" action="{{ url_for('training.delete_camp_plan', plan_id=plan.id) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this camp plan?')">
+                            <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash me-1"></i>Delete</button>
+                        </form>
+                    </div>
+                    <div class="card-body">
+                        
+                        <!-- Opponent Analysis -->
+                        {% if plan.opponent_strengths or plan.opponent_weaknesses %}
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card border-danger h-100">
+                                    <div class="card-header bg-danger text-white">
+                                        <h6 class="mb-0"><i class="fas fa-shield-alt me-2"></i>Opponent Strengths (Defend Against)</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="mb-0">{{ plan.opponent_strengths or 'Not specified' }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-success h-100">
+                                    <div class="card-header bg-success text-white">
+                                        <h6 class="mb-0"><i class="fas fa-crosshairs me-2"></i>Opponent Weaknesses (Attack)</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="mb-0">{{ plan.opponent_weaknesses or 'Not specified' }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Training Phases -->
+                        {% set phases = plan.plan_phases|load_json %}
+                        {% if phases %}
+                        <h5 class="mb-3"><i class="fas fa-layer-group me-2"></i>Training Phases</h5>
+                        
+                        <div class="accordion" id="campAccordion{{ plan.id }}">
+                            {% for phase_name, phase_details in phases.items() %}
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button {% if not loop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ plan.id }}_{{ loop.index }}">
+                                        <strong>{{ phase_name }}</strong>
+                                        <span class="badge bg-secondary ms-2">{{ phase_details.duration }}</span>
+                                    </button>
+                                </h2>
+                                <div id="collapse{{ plan.id }}_{{ loop.index }}" class="accordion-collapse collapse {% if loop.first %}show{% endif %}" data-bs-parent="#campAccordion{{ plan.id }}">
+                                    <div class="accordion-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <p><strong><i class="fas fa-bullseye text-primary me-1"></i>Focus:</strong> {{ phase_details.focus }}</p>
+                                                
+                                                {% if phase_details.training_priorities %}
+                                                <p class="mb-1"><strong><i class="fas fa-list-ol text-success me-1"></i>Training Priorities:</strong></p>
+                                                <ul class="small mb-3">
+                                                    {% for priority in phase_details.training_priorities %}
+                                                    <li>{{ priority }}</li>
+                                                    {% endfor %}
+                                                </ul>
+                                                {% endif %}
+                                                
+                                                {% if phase_details.training %}
+                                                <p><strong><i class="fas fa-running text-info me-1"></i>Training:</strong> {{ phase_details.training }}</p>
+                                                {% endif %}
+                                                
+                                                <p><strong><i class="fas fa-heartbeat text-danger me-1"></i>Conditioning:</strong> {{ phase_details.conditioning }}</p>
+                                            </div>
+                                            <div class="col-md-6">
+                                                {% if phase_details.sparring %}
+                                                <p class="mb-1"><strong><i class="fas fa-fist-raised text-warning me-1"></i>Sparring Focus:</strong></p>
+                                                {% if phase_details.sparring is iterable and phase_details.sparring is not string %}
+                                                <ul class="small mb-3">
+                                                    {% for spar in phase_details.sparring %}
+                                                    <li>{{ spar }}</li>
+                                                    {% endfor %}
+                                                </ul>
+                                                {% else %}
+                                                <p class="small">{{ phase_details.sparring }}</p>
+                                                {% endif %}
+                                                {% endif %}
+                                                
+                                                {% if phase_details.techniques %}
+                                                <p class="mb-1"><strong><i class="fas fa-hand-rock text-primary me-1"></i>Technique Drills:</strong></p>
+                                                <div class="mb-3">
+                                                    {% for technique in phase_details.techniques %}
+                                                    <span class="badge bg-primary me-1 mb-1">{{ technique }}</span>
+                                                    {% endfor %}
+                                                </div>
+                                                {% endif %}
+                                                
+                                                <p><strong><i class="fas fa-bed text-secondary me-1"></i>Recovery:</strong> {{ phase_details.recovery }}</p>
+                                                
+                                                {% if phase_details.mental %}
+                                                <p class="mb-1"><strong><i class="fas fa-brain text-purple me-1"></i>Mental Prep:</strong></p>
+                                                {% if phase_details.mental is iterable and phase_details.mental is not string %}
+                                                <ul class="small mb-0">
+                                                    {% for prep in phase_details.mental %}
+                                                    <li>{{ prep }}</li>
+                                                    {% endfor %}
+                                                </ul>
+                                                {% else %}
+                                                <p class="small mb-0">{{ phase_details.mental }}</p>
+                                                {% endif %}
+                                                {% endif %}
+                                                
+                                                {% if phase_details.nutrition %}
+                                                <p class="mt-2"><strong><i class="fas fa-utensils text-success me-1"></i>Nutrition:</strong> {{ phase_details.nutrition }}</p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center mt-5">
+                    <i class="fas fa-dumbbell fa-4x text-muted mb-3"></i>
+                    <h4>No camp plans found</h4>
+                    <p>You haven't created any training camp plans yet.</p>
+                    <a href="{{ url_for('training.camp_planner') }}" class="btn btn-primary"><i class="fas fa-plus-circle me-2"></i>Create Your First Camp Plan</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

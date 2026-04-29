@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Edit {{ fighter.name }} - FPMS{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-edit"></i> Edit Fighter: {{ fighter.name }}</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.name.label(class="form-label") }}
+                                {{ form.name(class="form-control", placeholder="Fighter name") }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.nickname.label(class="form-label") }}
+                                {{ form.nickname(class="form-control", placeholder="Nickname (optional)") }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.weight_class.label(class="form-label") }}
+                                {{ form.weight_class(class="form-control") }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.record.label(class="form-label") }}
+                                {{ form.record(class="form-control", placeholder="e.g., 15-3-0") }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.fighting_style.label(class="form-label") }}
+                                {{ form.fighting_style(class="form-control", placeholder="e.g., Brazilian Jiu-Jitsu, Boxing") }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.strengths.label(class="form-label") }}
+                                {{ form.strengths(class="form-control", rows=2, placeholder="Comma-separated strengths") }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.weaknesses.label(class="form-label") }}
+                                {{ form.weaknesses(class="form-control", rows=2, placeholder="Comma-separated weaknesses") }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.notable_fights.label(class="form-label") }}
+                                {{ form.notable_fights(class="form-control", rows=3, placeholder="List notable wins and losses") }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('fighters.fighter_detail', fighter_id=fighter.id) }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Details
+                        </a>
+                        <div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Update Fighter
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

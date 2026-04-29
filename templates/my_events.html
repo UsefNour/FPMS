@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block title %}My Events - FPMS{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="display-6 fw-bold"><i class="fas fa-calendar-check text-primary me-2"></i>My Events</h1>
+                    <p class="text-muted mb-0">Events you've created or registered for</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('events.events') }}" class="btn btn-outline-primary me-2">
+                        <i class="fas fa-search me-1"></i> Find Events
+                    </a>
+                    <a href="{{ url_for('events.create_event') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i> Create Event
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Events I'm Registered For -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-check-circle me-2"></i>Events I'm Registered/Interested In</h5>
+                </div>
+                <div class="card-body">
+                    {% if interested_events %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Event</th>
+                                    <th>Date</th>
+                                    <th>Location</th>
+                                    <th>Status</th>
+                                    <th>Weight Class</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in interested_events %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ url_for('events.event_detail', event_id=item.event.id) }}" class="text-decoration-none fw-semibold">
+                                            {{ item.event.name }}
+                                        </a>
+                                        <div class="small text-muted">
+                                            <span class="badge bg-secondary">{{ item.event.event_type }}</span>
+                                            <span class="badge bg-warning text-dark">{{ item.event.rules }}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>{{ item.event.date.strftime('%b %d, %Y') }}</div>
+                                        <small class="text-muted">{{ item.event.date.strftime('%I:%M %p') }}</small>
+                                        {% set days_until = (item.event.date.date() - now().date()).days %}
+                                        {% if days_until >= 0 and days_until <= 7 %}
+                                        <div><span class="badge bg-warning text-dark">{{ days_until }} days away</span></div>
+                                        {% elif days_until < 0 %}
+                                        <div><span class="badge bg-secondary">Event passed</span></div>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {{ item.event.city }}{% if item.event.state %}, {{ item.event.state }}{% endif %}
+                                    </td>
+                                    <td>
+                                        {% if item.status == 'registered' %}
+                                        <span class="badge bg-success fs-6"><i class="fas fa-check me-1"></i>Registered</span>
+                                        {% else %}
+                                        <span class="badge bg-info fs-6"><i class="fas fa-star me-1"></i>Interested</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ item.weight_class or '-' }}</td>
+                                    <td>
+                                        <a href="{{ url_for('events.event_detail', event_id=item.event.id) }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                        <h5>No Event Registrations Yet</h5>
+                        <p class="text-muted">You haven't registered for any events. Browse upcoming events to find competitions near you!</p>
+                        <a href="{{ url_for('events.events') }}" class="btn btn-primary">
+                            <i class="fas fa-search me-1"></i> Find Events
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Events I'm Organizing -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fas fa-crown me-2"></i>Events I'm Organizing</h5>
+                </div>
+                <div class="card-body">
+                    {% if organized_events %}
+                    <div class="row">
+                        {% for event in organized_events %}
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100 border-0 shadow-sm">
+                                <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                    <span class="badge bg-light text-dark">{{ event.event_type }}</span>
+                                    <span class="badge bg-warning text-dark">{{ event.rules }}</span>
+                                    <h6 class="text-white mt-2 mb-0">{{ event.name }}</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-2">
+                                        <i class="fas fa-calendar text-primary me-2"></i>
+                                        {{ event.date.strftime('%B %d, %Y') }}
+                                    </div>
+                                    <div class="mb-2">
+                                        <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                                        {{ event.city }}{% if event.state %}, {{ event.state }}{% endif %}
+                                    </div>
+                                    <div class="mb-2">
+                                        <i class="fas fa-users text-success me-2"></i>
+                                        {{ event.interests | selectattr('status', 'eq', 'registered') | list | length }} registered
+                                    </div>
+                                    {% set days_until = (event.date.date() - now().date()).days %}
+                                    {% if days_until < 0 %}
+                                    <span class="badge bg-secondary">Event completed</span>
+                                    {% elif days_until <= 7 %}
+                                    <span class="badge bg-warning text-dark">{{ days_until }} days away</span>
+                                    {% endif %}
+                                </div>
+                                <div class="card-footer bg-transparent">
+                                    <div class="btn-group w-100">
+                                        <a href="{{ url_for('events.event_detail', event_id=event.id) }}" class="btn btn-outline-primary">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                        <a href="{{ url_for('events.edit_event', event_id=event.id) }}" class="btn btn-outline-secondary">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-bullhorn fa-3x text-muted mb-3"></i>
+                        <h5>You Haven't Created Any Events Yet</h5>
+                        <p class="text-muted">Create your first event to start attracting fighters to your competition!</p>
+                        <a href="{{ url_for('events.create_event') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-1"></i> Create Event
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

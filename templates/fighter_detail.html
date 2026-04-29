@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}{{ fighter.name }} - Fighter Details{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-user"></i> {{ fighter.name }}
+                    {% if fighter.nickname %}
+                    <small class="text-muted">({{ fighter.nickname }})</small>
+                    {% endif %}
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Basic Information</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Weight Class:</strong></td>
+                                <td>{{ fighter.weight_class }}</td>
+                            </tr>
+                            {% if fighter.record %}
+                            <tr>
+                                <td><strong>Record:</strong></td>
+                                <td>{{ fighter.record }}</td>
+                            </tr>
+                            {% endif %}
+                            {% if fighter.fighting_style %}
+                            <tr>
+                                <td><strong>Fighting Style:</strong></td>
+                                <td>{{ fighter.fighting_style }}</td>
+                            </tr>
+                            {% endif %}
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Analysis</h6>
+                        {% if fighter.strengths %}
+                        <p><strong>Strengths:</strong></p>
+                        <ul>
+                            {% for strength in fighter.strengths.split(',') %}
+                            <li>{{ strength.strip() }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+
+                        {% if fighter.weaknesses %}
+                        <p><strong>Weaknesses:</strong></p>
+                        <ul>
+                            {% for weakness in fighter.weaknesses.split(',') %}
+                            <li>{{ weakness.strip() }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if fighter.notable_fights %}
+                <div class="mt-4">
+                    <h6>Notable Fights</h6>
+                    <div class="border p-3 rounded">
+                        {{ fighter.notable_fights|replace('\n', '<br>')|safe }}
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="mt-4">
+                    <small class="text-muted">
+                        Added: {{ fighter.created_at.strftime('%B %d, %Y') }}
+                        {% if fighter.updated_at != fighter.created_at %}
+                        | Last updated: {{ fighter.updated_at.strftime('%B %d, %Y') }}
+                        {% endif %}
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-cogs"></i> Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('fighters.compare_fighters', fighter1=fighter.id) }}" class="btn btn-primary">
+                        <i class="fas fa-balance-scale me-2"></i>Compare Fighters
+                    </a>
+                    <a href="{{ url_for('fighters.use_fighter', fighter_id=fighter.id) }}" class="btn btn-outline-success">
+                        <i class="fas fa-plus me-2"></i>Use for Game Plan
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle"></i> Quick Tips</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>For Comparison:</strong></p>
+                <ul class="small">
+                    <li>Compare records and win rates</li>
+                    <li>Analyze fighting styles</li>
+                    <li>Compare physical attributes</li>
+                    <li>Study strengths vs weaknesses</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

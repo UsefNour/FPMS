@@ -1,0 +1,248 @@
+{% extends 'base.html' %}
+
+{% block title %}Events & Tournaments - FPMS{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Page Header -->
+        <div class="col-12 mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="display-6 fw-bold"><i class="fas fa-trophy text-warning me-2"></i>Events & Tournaments</h1>
+                    <p class="text-muted mb-0">Find upcoming competitions, tournaments, and fight events near you</p>
+                </div>
+                <div>
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('events.my_events') }}" class="btn btn-outline-primary me-2">
+                        <i class="fas fa-calendar-check me-1"></i> My Events
+                    </a>
+                    <a href="{{ url_for('events.create_event') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i> Create Event
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Filters Sidebar -->
+        <div class="col-lg-3 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <i class="fas fa-filter me-2"></i>Filter Events
+                </div>
+                <div class="card-body">
+                    <form method="GET" action="{{ url_for('events.events') }}">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">City</label>
+                            <input type="text" class="form-control" name="city" value="{{ request.args.get('city', '') }}" placeholder="e.g., London, Manchester">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Country</label>
+                            <select class="form-select" name="country">
+                                <option value="">All Countries</option>
+                                <option value="United Kingdom" {{ 'selected' if request.args.get('country') == 'United Kingdom' }}>United Kingdom</option>
+                                <option value="England" {{ 'selected' if request.args.get('country') == 'England' }}>England</option>
+                                <option value="Scotland" {{ 'selected' if request.args.get('country') == 'Scotland' }}>Scotland</option>
+                                <option value="Wales" {{ 'selected' if request.args.get('country') == 'Wales' }}>Wales</option>
+                                <option value="Northern Ireland" {{ 'selected' if request.args.get('country') == 'Northern Ireland' }}>Northern Ireland</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Weight Class</label>
+                            <select class="form-select" name="weight_class">
+                                <option value="">All Weight Classes</option>
+                                <option value="Rooster" {{ 'selected' if request.args.get('weight_class') == 'Rooster' }}>Rooster (57.5kg)</option>
+                                <option value="Light Feather" {{ 'selected' if request.args.get('weight_class') == 'Light Feather' }}>Light Feather (64kg)</option>
+                                <option value="Feather" {{ 'selected' if request.args.get('weight_class') == 'Feather' }}>Featherweight</option>
+                                <option value="Light" {{ 'selected' if request.args.get('weight_class') == 'Light' }}>Lightweight</option>
+                                <option value="Middle" {{ 'selected' if request.args.get('weight_class') == 'Middle' }}>Middleweight</option>
+                                <option value="Medium Heavy" {{ 'selected' if request.args.get('weight_class') == 'Medium Heavy' }}>Medium Heavy</option>
+                                <option value="Heavy" {{ 'selected' if request.args.get('weight_class') == 'Heavy' }}>Heavyweight</option>
+                                <option value="Super Heavy" {{ 'selected' if request.args.get('weight_class') == 'Super Heavy' }}>Super Heavy</option>
+                                <option value="Ultra Heavy" {{ 'selected' if request.args.get('weight_class') == 'Ultra Heavy' }}>Ultra Heavy</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Experience Level</label>
+                            <select class="form-select" name="experience_level">
+                                <option value="">All Levels</option>
+                                <option value="Beginner" {{ 'selected' if request.args.get('experience_level') == 'Beginner' }}>Beginner (0-1 fights)</option>
+                                <option value="Intermediate" {{ 'selected' if request.args.get('experience_level') == 'Intermediate' }}>Intermediate (2-5 fights)</option>
+                                <option value="Advanced" {{ 'selected' if request.args.get('experience_level') == 'Advanced' }}>Advanced (6-10 fights)</option>
+                                <option value="Expert" {{ 'selected' if request.args.get('experience_level') == 'Expert' }}>Expert (10+ fights)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Event Type</label>
+                            <select class="form-select" name="event_type">
+                                <option value="">All Types</option>
+                                <option value="bjj" {{ 'selected' if request.args.get('event_type') == 'bjj' }}>BJJ / Grappling</option>
+                                <option value="mma" {{ 'selected' if request.args.get('event_type') == 'mma' }}>MMA</option>
+                                <option value="judo" {{ 'selected' if request.args.get('event_type') == 'judo' }}>Judo</option>
+                                <option value="wrestling" {{ 'selected' if request.args.get('event_type') == 'wrestling' }}>Wrestling</option>
+                                <option value="karate" {{ 'selected' if request.args.get('event_type') == 'karate' }}>Karate</option>
+                                <option value="kickboxing" {{ 'selected' if request.args.get('event_type') == 'kickboxing' }}>Kickboxing / Muay Thai</option>
+                                <option value="boxing" {{ 'selected' if request.args.get('event_type') == 'boxing' }}>Boxing</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Rules</label>
+                            <select class="form-select" name="rules">
+                                <option value="">All Rules</option>
+                                <option value="IBJJF" {{ 'selected' if request.args.get('rules') == 'IBJJF' }}>IBJJF</option>
+                                <option value="ADCC" {{ 'selected' if request.args.get('rules') == 'ADCC' }}>ADCC</option>
+                                <option value="NAGA" {{ 'selected' if request.args.get('rules') == 'NAGA' }}>NAGA</option>
+                                <option value="Submission Only" {{ 'selected' if request.args.get('rules') == 'Submission Only' }}>Submission Only</option>
+                                <option value="No-Gi" {{ 'selected' if request.args.get('rules') == 'No-Gi' }}>No-Gi</option>
+                                <option value="Gi" {{ 'selected' if request.args.get('rules') == 'Gi' }}>Gi</option>
+                                <option value="BJJ Points" {{ 'selected' if request.args.get('rules') == 'BJJ Points' }}>BJJ Points</option>
+                                <option value="MMA" {{ 'selected' if request.args.get('rules') == 'MMA' }}>MMA</option>
+                                <option value="Judo" {{ 'selected' if request.args.get('rules') == 'Judo' }}>Judo</option>
+                            </select>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search me-1"></i> Search
+                            </button>
+                            <a href="{{ url_for('events.events') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i> Clear Filters
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Events List -->
+        <div class="col-lg-9">
+            {% if events %}
+            <div class="row">
+                {% for event in events %}
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 shadow-sm hover-shadow">
+                        <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <span class="badge bg-light text-dark mb-2">{{ event.event_type }}</span>
+                                    <span class="badge bg-warning text-dark mb-2">{{ event.rules }}</span>
+                                </div>
+                                {% if user_interests.get(event.id) == 'registered' %}
+                                <span class="badge bg-success"><i class="fas fa-check"></i> Registered</span>
+                                {% elif user_interests.get(event.id) == 'interested' %}
+                                <span class="badge bg-info"><i class="fas fa-star"></i> Interested</span>
+                                {% endif %}
+                            </div>
+                            <h5 class="card-title text-white mb-0">{{ event.name }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-calendar-alt text-primary me-2"></i>
+                                    <strong>{{ event.date.strftime('%B %d, %Y') }}</strong>
+                                    <span class="ms-2 text-muted">{{ event.date.strftime('%I:%M %p') }}</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                                    <span>{{ event.city }}{% if event.state %}, {{ event.state }}{% endif %}</span>
+                                </div>
+                                {% if event.venue_name %}
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-building text-secondary me-2"></i>
+                                    <span class="text-muted">{{ event.venue_name }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Weight Classes -->
+                            <div class="mb-3">
+                                <small class="text-muted d-block mb-1">Weight Classes:</small>
+                                <div>
+                                    {% for wc in event.get_weight_classes_list()[:4] %}
+                                    <span class="badge bg-secondary me-1 mb-1">{{ wc }}</span>
+                                    {% endfor %}
+                                    {% if event.get_weight_classes_list()|length > 4 %}
+                                    <span class="badge bg-secondary me-1 mb-1">+{{ event.get_weight_classes_list()|length - 4 }} more</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Experience Levels -->
+                            <div class="mb-3">
+                                <small class="text-muted d-block mb-1">Experience Levels:</small>
+                                <div>
+                                    {% for level in event.get_experience_levels_list() %}
+                                    <span class="badge bg-outline-primary border border-primary text-primary me-1">{{ level }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            {% if event.entry_fee > 0 %}
+                            <div class="mb-2">
+                                <i class="fas fa-dollar-sign text-success me-1"></i>
+                                <span>Entry Fee: <strong>${{ "%.2f"|format(event.entry_fee) }}</strong></span>
+                            </div>
+                            {% else %}
+                            <div class="mb-2">
+                                <span class="badge bg-success"><i class="fas fa-gift me-1"></i>Free Entry</span>
+                            </div>
+                            {% endif %}
+
+                            <!-- Days until event -->
+                            {% set days_until = (event.date.date() - now().date()).days %}
+                            {% if days_until >= 0 %}
+                            <div class="text-muted small">
+                                <i class="fas fa-clock me-1"></i>
+                                {% if days_until == 0 %}
+                                <span class="text-danger fw-bold">Today!</span>
+                                {% elif days_until == 1 %}
+                                <span class="text-warning fw-bold">Tomorrow</span>
+                                {% else %}
+                                {{ days_until }} days away
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a href="{{ url_for('events.event_detail', event_id=event.id) }}" class="btn btn-primary w-100">
+                                <i class="fas fa-info-circle me-1"></i> View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-calendar-times fa-4x text-muted mb-3"></i>
+                <h4>No Events Found</h4>
+                <p class="text-muted">No upcoming events match your criteria. Try adjusting your filters or check back later!</p>
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('events.create_event') }}" class="btn btn-primary mt-3">
+                    <i class="fas fa-plus me-1"></i> Create an Event
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.hover-shadow {
+    transition: all 0.3s ease;
+}
+.hover-shadow:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+}
+</style>
+{% endblock %}

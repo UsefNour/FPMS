@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Friends - FPMS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-user-plus"></i> Send Friend Request</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ form.username.label(class="form-label") }}
+                        {{ form.username(class="form-control", placeholder="Enter username") }}
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Send Friend Request
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        {% if pending_requests %}
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-clock"></i> Pending Friend Requests</h5>
+            </div>
+            <div class="card-body">
+                {% for request in pending_requests %}
+                <div class="d-flex justify-content-between align-items-center mb-3 p-3 border rounded">
+                    <div>
+                        <strong>{{ request.sender.username }}</strong> wants to be your friend
+                    </div>
+                    <div>
+                        <form method="POST" action="{{ url_for('social.accept_friend', request_id=request.id) }}" class="d-inline">
+                            <button type="submit" class="btn btn-success btn-sm">
+                                <i class="fas fa-check"></i> Accept
+                            </button>
+                        </form>
+                        <form method="POST" action="{{ url_for('social.decline_friend', request_id=request.id) }}" class="d-inline ms-2">
+                            <button type="submit" class="btn btn-danger btn-sm">
+                                <i class="fas fa-times"></i> Decline
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-users"></i> My Friends</h5>
+            </div>
+            <div class="card-body">
+                {% if friends_list %}
+                    <div class="row">
+                        {% for friend in friends_list %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title mb-1">{{ friend.username }}</h6>
+                                        <small class="text-muted">Friend since {{ friend.created_at.strftime('%B %Y') }}</small>
+                                    </div>
+                                    <div>
+                                        <a href="{{ url_for('social.friend_profile', friend_id=friend.id) }}" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-eye"></i> View Profile
+                                        </a>
+                                        <a href="{{ url_for('social.chat', friend_id=friend.id) }}" class="btn btn-outline-info btn-sm ms-1">
+                                            <i class="fas fa-comments"></i> Chat
+                                        </a>
+                                        <form method="POST" action="{{ url_for('social.remove_friend', friend_id=friend.id) }}" class="d-inline ms-2">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Are you sure you want to remove this friend?')">
+                                                <i class="fas fa-user-minus"></i> Remove
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No friends yet</h5>
+                        <p class="text-muted">Send friend requests to connect with other fighters!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle"></i> Friend System</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>How it works:</strong></p>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-user-plus text-primary me-2"></i> Send requests by username</li>
+                    <li><i class="fas fa-check text-success me-2"></i> Accept or decline requests</li>
+                    <li><i class="fas fa-eye text-info me-2"></i> View friends' profiles</li>
+                    <li><i class="fas fa-share-alt text-warning me-2"></i> Share training data</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

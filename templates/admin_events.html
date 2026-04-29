@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+
+{% block title %}Admin - Event Registrations{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><i class="fas fa-shield-alt text-danger me-2"></i>Admin Dashboard</h2>
+            <p class="text-muted mb-0">View all event registrations and manage participants</p>
+        </div>
+        <a href="{{ url_for('events.events') }}" class="btn btn-outline-primary">
+            <i class="fas fa-calendar me-2"></i>Back to Events
+        </a>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0">{{ total_events }}</h3>
+                            <small>Total Events</small>
+                        </div>
+                        <i class="fas fa-calendar-alt fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0">{{ total_registered }}</h3>
+                            <small>Total Registered</small>
+                        </div>
+                        <i class="fas fa-user-check fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0">{{ total_interested }}</h3>
+                            <small>Total Interested</small>
+                        </div>
+                        <i class="fas fa-star fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0">{{ upcoming_events }}</h3>
+                            <small>Upcoming Events</small>
+                        </div>
+                        <i class="fas fa-clock fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search & Filter -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" class="form-control" id="searchInput" placeholder="Search by name, email, or event...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="eventFilter">
+                        <option value="">All Events</option>
+                        {% for event in events %}
+                        <option value="{{ event.name }}">{{ event.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="statusFilter">
+                        <option value="">All Statuses</option>
+                        <option value="registered">Registered Only</option>
+                        <option value="interested">Interested Only</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-outline-secondary w-100" onclick="clearFilters()">
+                        <i class="fas fa-times me-1"></i>Clear
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Events with Registrations -->
+    {% for event in events %}
+    <div class="card mb-4 shadow-sm event-card" data-event-name="{{ event.name }}">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-0">
+                    <i class="fas fa-trophy me-2"></i>{{ event.name }}
+                </h5>
+                <small class="text-muted">
+                    {{ event.date.strftime('%B %d, %Y') }} | {{ event.city }}, {{ event.state or event.country }}
+                    <span class="badge bg-secondary ms-2">{{ event.event_type }}</span>
+                    <span class="badge bg-warning text-dark">{{ event.rules }}</span>
+                </small>
+            </div>
+            <div>
+                <span class="badge bg-success me-2">{{ event.registered_count }} Registered</span>
+                <span class="badge bg-info">{{ event.interested_count }} Interested</span>
+                <a href="{{ url_for('events.event_detail', event_id=event.id) }}" class="btn btn-sm btn-light ms-3">
+                    <i class="fas fa-eye"></i> View Event
+                </a>
+            </div>
+        </div>
+        
+        {% if event.participants %}
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 5%">#</th>
+                            <th style="width: 20%">Fighter</th>
+                            <th style="width: 20%">Email</th>
+                            <th style="width: 12%">Status</th>
+                            <th style="width: 15%">Weight Class</th>
+                            <th style="width: 15%">Notes</th>
+                            <th style="width: 13%">Signed Up</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in event.participants %}
+                        <tr class="participant-row" data-username="{{ p.user.username|lower }}" data-email="{{ p.user.email|lower }}" data-status="{{ p.status }}">
+                            <td>{{ loop.index }}</td>
+                            <td>
+                                <a href="{{ url_for('social.friend_profile', friend_id=p.user.id) }}" class="text-decoration-none">
+                                    <i class="fas fa-user-circle me-1"></i>{{ p.user.username }}
+                                </a>
+                            </td>
+                            <td><small>{{ p.user.email }}</small></td>
+                            <td>
+                                {% if p.status == 'registered' %}
+                                <span class="badge bg-success"><i class="fas fa-check me-1"></i>Registered</span>
+                                {% elif p.status == 'interested' %}
+                                <span class="badge bg-info"><i class="fas fa-star me-1"></i>Interested</span>
+                                {% else %}
+                                <span class="badge bg-secondary">{{ p.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ p.weight_class or '-' }}</td>
+                            <td><small class="text-muted">{{ p.notes or '-' }}</small></td>
+                            <td><small>{{ p.created_at.strftime('%m/%d/%Y %H:%M') }}</small></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+        <div class="card-body text-center text-muted py-4">
+            <i class="fas fa-users-slash fa-2x mb-2"></i>
+            <p class="mb-0">No registrations yet</p>
+        </div>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i>No events found.
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+// Simple search function
+document.getElementById('searchInput').addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase().trim();
+    
+    document.querySelectorAll('.event-card').forEach(card => {
+        const eventName = card.dataset.eventName.toLowerCase();
+        let cardHasMatch = false;
+        
+        // Check if event name matches
+        if (eventName.includes(searchTerm)) {
+            cardHasMatch = true;
+        }
+        
+        // Check each participant row
+        card.querySelectorAll('.participant-row').forEach(row => {
+            const username = row.dataset.username || '';
+            const email = row.dataset.email || '';
+            const rowText = username + ' ' + email;
+            
+            if (searchTerm === '' || rowText.includes(searchTerm) || eventName.includes(searchTerm)) {
+                row.style.display = '';
+                cardHasMatch = true;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Show/hide the entire card
+        card.style.display = (searchTerm === '' || cardHasMatch) ? '' : 'none';
+    });
+});
+
+// Event dropdown filter
+document.getElementById('eventFilter').addEventListener('change', function() {
+    const selectedEvent = this.value;
+    
+    document.querySelectorAll('.event-card').forEach(card => {
+        if (selectedEvent === '' || card.dataset.eventName === selectedEvent) {
+            card.style.display = '';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+});
+
+// Status filter
+document.getElementById('statusFilter').addEventListener('change', function() {
+    const selectedStatus = this.value;
+    
+    document.querySelectorAll('.event-card').forEach(card => {
+        let hasVisibleRows = false;
+        
+        card.querySelectorAll('.participant-row').forEach(row => {
+            const status = row.dataset.status || '';
+            
+            if (selectedStatus === '' || status === selectedStatus) {
+                row.style.display = '';
+                hasVisibleRows = true;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Only hide card if filtering by status and no matches
+        if (selectedStatus !== '' && !hasVisibleRows) {
+            card.style.display = 'none';
+        } else if (selectedStatus === '') {
+            card.style.display = '';
+            card.querySelectorAll('.participant-row').forEach(row => {
+                row.style.display = '';
+            });
+        }
+    });
+});
+
+function clearFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('eventFilter').value = '';
+    document.getElementById('statusFilter').value = '';
+    
+    // Show all cards and rows
+    document.querySelectorAll('.event-card').forEach(card => {
+        card.style.display = '';
+        card.querySelectorAll('.participant-row').forEach(row => {
+            row.style.display = '';
+        });
+    });
+}
+</script>
+{% endblock %}

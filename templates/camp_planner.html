@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Camp Planner - FPMS{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Generate Training Camp Plan</h2>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.fight_type.label(class="form-label") }}
+                                {{ form.fight_type(class="form-select") }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.opponent_name.label(class="form-label") }}
+                                {{ form.opponent_name(class="form-control", placeholder="Enter opponent's name (optional)") }}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.opponent_strengths.label(class="form-label") }}
+                            <small class="text-muted d-block mb-1">What is your opponent good at? (This will be used to build your defensive training)</small>
+                            {{ form.opponent_strengths(class="form-control", rows=4) }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.opponent_weaknesses.label(class="form-label") }}
+                            <small class="text-muted d-block mb-1">What are your opponent's weaknesses? (This will be used to build your offensive training)</small>
+                            {{ form.opponent_weaknesses(class="form-control", rows=4) }}
+                        </div>
+                        
+                        <div class="d-grid">
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Camp Overview</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong><i class="fas fa-clock me-2"></i>Weeks Remaining:</strong> <span class="badge bg-primary fs-5">{{ weeks_remaining }}</span></p>
+                    <p class="small text-muted">Based on your fight date, your camp plan will be tailored for a {{ weeks_remaining }}-week preparation.</p>
+                    <hr>
+                    <p class="small"><strong>The generated plan will include:</strong></p>
+                    <ul class="small">
+                        <li>Training priorities based on opponent analysis</li>
+                        <li>Sparring focus for each phase</li>
+                        <li>Specific technique drills</li>
+                        <li>Conditioning protocols</li>
+                        <li>Mental preparation guidance</li>
+                        <li>Recovery recommendations</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Tips for Input</h5>
+                </div>
+                <div class="card-body small">
+                    <p><strong>Opponent Strengths Examples:</strong></p>
+                    <ul>
+                        <li>Strong wrestling, heavy pressure</li>
+                        <li>Knockout power, fast hands</li>
+                        <li>Excellent cardio, submission threat</li>
+                        <li>Counter striker, good timing</li>
+                    </ul>
+                    <p><strong>Opponent Weaknesses Examples:</strong></p>
+                    <ul>
+                        <li>Poor cardio, fades in later rounds</li>
+                        <li>Weak takedown defense, bad TDD</li>
+                        <li>Questionable chin, gets hurt easily</li>
+                        <li>Slow starter, poor defense</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

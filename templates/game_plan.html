@@ -1,0 +1,163 @@
+﻿{% extends "base.html" %}
+
+{% block title %}AI Game Plan Generator{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    {% if fighter %}
+                    <h2 class="mb-0"><i class="fas fa-crosshairs me-2"></i>Game Plan vs {{ fighter.name }}</h2>
+                    <small class="text-muted">Generate a strategic game plan based on {{ fighter.name }}'s strengths and weaknesses</small>
+                    {% else %}
+                    <h2 class="mb-0"><i class="fas fa-chess me-2"></i>AI Game Plan Generator</h2>
+                    <small class="text-muted">Enter your opponent's strengths and weaknesses, and our AI will generate a strategic game plan for you.</small>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if fighter %}
+                    <!-- Fighter Info Card -->
+                    <div class="card bg-dark mb-4">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h4 class="text-white mb-1">{{ fighter.name }}</h4>
+                                    {% if fighter.nickname %}
+                                    <p class="text-muted mb-2">"{{ fighter.nickname }}"</p>
+                                    {% endif %}
+                                    <span class="badge bg-primary me-2">{{ fighter.weight_class }}</span>
+                                    {% if fighter.record %}
+                                    <span class="badge bg-secondary">{{ fighter.record }}</span>
+                                    {% endif %}
+                                    {% if fighter.fighting_style %}
+                                    <span class="badge bg-info">{{ fighter.fighting_style }}</span>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <a href="{{ url_for('fighters.fighter_detail', fighter_id=fighter.id) }}" class="btn btn-outline-light btn-sm">
+                                        <i class="fas fa-user me-1"></i>View Profile
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Fighter Strengths & Weaknesses Display -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card border-success">
+                                <div class="card-header bg-success text-white">
+                                    <i class="fas fa-plus-circle me-2"></i>Strengths
+                                </div>
+                                <div class="card-body">
+                                    {% if fighter.strengths %}
+                                    <ul class="mb-0">
+                                        {% for strength in fighter.strengths.split(',') %}
+                                        <li>{{ strength.strip() }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                    {% else %}
+                                    <p class="text-muted mb-0">No strengths recorded</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-danger">
+                                <div class="card-header bg-danger text-white">
+                                    <i class="fas fa-minus-circle me-2"></i>Weaknesses
+                                </div>
+                                <div class="card-body">
+                                    {% if fighter.weaknesses %}
+                                    <ul class="mb-0">
+                                        {% for weakness in fighter.weaknesses.split(',') %}
+                                        <li>{{ weakness.strip() }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                    {% else %}
+                                    <p class="text-muted mb-0">No weaknesses recorded</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Simple Form - Just Rounds -->
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        <input type="hidden" name="opponent_strengths" value="{{ fighter.strengths or '' }}">
+                        <input type="hidden" name="opponent_weaknesses" value="{{ fighter.weaknesses or '' }}">
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold"><i class="fas fa-bell me-2"></i>Number of Rounds</label>
+                            {{ form.fight_rounds(class="form-select form-select-lg") }}
+                            <small class="text-muted">Select the number of rounds for your upcoming fight</small>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-magic me-2"></i>Generate Game Plan
+                            </button>
+                        </div>
+                    </form>
+                    
+                    {% else %}
+                    <!-- Manual Entry Form -->
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-3">
+                            {{ form.fight_rounds.label(class="form-label") }}
+                            {{ form.fight_rounds(class="form-select") }}
+                            {% if form.fight_rounds.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.fight_rounds.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.opponent_strengths.label(class="form-label") }}
+                            {{ form.opponent_strengths(class="form-control", rows="4", placeholder="e.g., Strong striking, good cardio, wrestling background, powerful punches") }}
+                            {% if form.opponent_strengths.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.opponent_strengths.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.opponent_weaknesses.label(class="form-label") }}
+                            {{ form.opponent_weaknesses(class="form-control", rows="4", placeholder="e.g., Weak grappling, poor cardio, glass chin, slow footwork") }}
+                            {% if form.opponent_weaknesses.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.opponent_weaknesses.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid">
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
+                        </div>
+                    </form>
+                    {% endif %}
+                    
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('fighters.fighters') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-search me-2"></i>Select from Fighter Database
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
