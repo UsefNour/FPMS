@@ -6,6 +6,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch, Rectangle
 import matplotlib.image as mpimg
+import numpy as np
 
 DEST = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), 'screenshots')
 DPI  = 100
@@ -44,10 +45,22 @@ def add_img(path, lx, by, iw, ih):
         ax.add_patch(Rectangle((lx,by),iw,ih, facecolor=LGREY,
                                 edgecolor=BLUE, linewidth=1, zorder=8))
         return
-    ax.add_patch(Rectangle((lx-0.05, by-0.05), iw+0.10, ih+0.10,
+    img = mpimg.imread(path)
+    # crop to target aspect ratio so nothing is stretched
+    target = iw / ih
+    h, w = img.shape[:2]
+    if w / h > target:          # too wide — crop sides
+        new_w = int(h * target)
+        x0 = (w - new_w) // 2
+        img = img[:, x0:x0+new_w]
+    else:                       # too tall — show top (most useful content)
+        new_h = int(w / target)
+        img = img[:new_h, :]
+    # blue border
+    ax.add_patch(Rectangle((lx-0.06, by-0.06), iw+0.12, ih+0.12,
                             facecolor=BLUE, linewidth=0, zorder=8))
     a = fig.add_axes([lx/W, by/H, iw/W, ih/H])
-    a.imshow(mpimg.imread(path), aspect='auto')
+    a.imshow(img, aspect='auto', interpolation='lanczos')
     a.axis('off')
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -230,8 +243,8 @@ features = [
      'across all pages; messages persist between sessions in the database.'),
 ]
 
-CARD_H = 0.82
-CARD_GAP = 0.14
+CARD_H = 0.72
+CARD_GAP = 0.10
 for i, (title, line1, line2) in enumerate(features):
     cy = RY - i * (CARD_H + CARD_GAP)
     # card background
@@ -253,21 +266,21 @@ shots_top = RY - 6*(CARD_H+CARD_GAP) - 0.18
 
 # ── Application Screenshots ───────────────────────────────────────────────────
 shdr(RX, shots_top, RW, 'Application Screenshots')
-SY = shots_top - 0.28
-SH = 2.14   # each screenshot height
+SY = shots_top - 0.26
+SH = 2.55   # each screenshot height
 
 add_img(os.path.join(DEST, '02_dashboard.png'), RX, SY-SH, RW, SH)
-ax.text(RX+RW/2, SY-SH-0.20,
-        'Figure 1 — Dashboard: fight countdown, weight status, camp phase and warnings',
+ax.text(RX+RW/2, SY-SH-0.18,
+        'Figure 1 — Dashboard: fight countdown, weight status, camp phase and readiness score',
         ha='center', va='top', fontsize=7.8, color=MGREY, style='italic', zorder=12)
 
-SY2 = SY - SH - 0.42
-add_img(os.path.join(DEST, '03_camp_plan.png'), RX, SY2-SH, RW, SH)
-ax.text(RX+RW/2, SY2-SH-0.20,
-        'Figure 2 — Opponent-specific camp plan: five periodised phases with drills',
+SY2 = SY - SH - 0.40
+add_img(os.path.join(DEST, '04_sparring_dashboard.png'), RX, SY2-SH, RW, SH)
+ax.text(RX+RW/2, SY2-SH-0.18,
+        'Figure 2 — Sparring partner finder: Haversine-ranked cards with skill and distance',
         ha='center', va='top', fontsize=7.8, color=MGREY, style='italic', zorder=12)
 
-arch_top = SY2 - SH - 0.44
+arch_top = SY2 - SH - 0.40
 
 # ── System Architecture ───────────────────────────────────────────────────────
 shdr(RX, arch_top, RW, 'System Architecture')
