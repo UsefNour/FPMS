@@ -89,15 +89,36 @@ ax.text(0.45, 17.44,
         ha='left', va='top', fontsize=8.5, color='#7A9AB5', zorder=3)
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# BODY  y = 2.70 → 17.20     columns separated at x = 6.30
+# ABSTRACT STRIP  y = 16.10 → 17.20
 # ═══════════════════════════════════════════════════════════════════════════════
-ax.plot([6.30, 6.30], [2.80, 17.10], color='#CCDDEE', lw=0.9, zorder=2)
+ax.add_patch(Rectangle((0, 16.10), W, 1.10, facecolor='#EEF3FA', zorder=1))
+ax.add_patch(Rectangle((0, 17.08), W, 0.04, facecolor=BLUE, zorder=2))
+ax.add_patch(Rectangle((0, 16.10), W, 0.04, facecolor=BLUE, zorder=2))
+ax.text(0.38, 17.02, 'Abstract', ha='left', va='top',
+        fontsize=10, fontweight='bold', color=DBLUE, zorder=3)
+ax.text(0.38, 16.84,
+        'FPMS is a web-based training management platform built for amateur combat sports athletes who prepare '
+        'without a full coaching team behind them.',
+        ha='left', va='top', fontsize=9, color=DGREY, zorder=3)
+ax.text(0.38, 16.67,
+        'It unifies fight-camp planning, weight tracking, opponent analysis, sparring partner discovery, real-time '
+        'social communication, and event management',
+        ha='left', va='top', fontsize=9, color=DGREY, zorder=3)
+ax.text(0.38, 16.50,
+        'into a single accessible tool. Developed over twelve weeks using Flask, SQLAlchemy, and Flask-SocketIO, '
+        'the system satisfies all 40 functional requirements across 7 feature modules.',
+        ha='left', va='top', fontsize=9, color=DGREY, zorder=3)
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# BODY  y = 2.70 → 16.10     columns separated at x = 6.30
+# ═══════════════════════════════════════════════════════════════════════════════
+ax.plot([6.30, 6.30], [2.80, 16.00], color='#CCDDEE', lw=0.9, zorder=2)
 
 LX, LW = 0.38, 5.68    # left col
 RX, RW = 6.52, 6.05    # right col
 
 # ════════════════════════════ LEFT COLUMN ═════════════════════════════════════
-Y = 17.05   # cursor
+Y = 15.95   # cursor
 
 # ── Introduction ──────────────────────────────────────────────────────────────
 Y = shdr(LX, Y, LW, 'Introduction')
@@ -219,7 +240,7 @@ for fw in [
 # ════════════════════════════ RIGHT COLUMN ════════════════════════════════════
 
 # ── Key Features (6 cards, from top) ─────────────────────────────────────────
-RY = 17.05
+RY = 15.95
 RY = shdr(RX, RY, RW, 'Key Features')
 
 features = [
