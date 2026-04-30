@@ -68,7 +68,7 @@ ax.text(W/2, 18.04,
         'A combat sports training platform: camp planning · sparring · weight management · events · real-time chat',
         ha='center', va='top', fontsize=9, color='#C0D5E8', style='italic', zorder=3)
 # Student name
-ax.text(0.45, 17.72, 'Yousef Nour',
+ax.text(0.45, 17.72, 'Youssef Nour',
         ha='left', va='top', fontsize=12, fontweight='bold', color=WHITE, zorder=3)
 # Student details
 ax.text(0.45, 17.44,

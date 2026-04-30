@@ -287,13 +287,14 @@ doc.add_paragraph(); doc.add_paragraph()
 add_hrule(); doc.add_paragraph()
 
 for label, value in [
-    ('Student Name:',    'Yousef Nour'),
+    ('Student Name:',    'Youssef Nour'),
     ('Student Number:',  '23019868'),
     ('Module Title:',    'Software Development Project'),
     ('Module Code:',     'UFCFFF-30-3'),
     ('Module Leader:',   'Steve Battle'),
     ('Submission Date:', '30 April 2026'),
     ('Word Count:',      'approx. 6,400 words (excl. tables, references and captions)'),
+    ('GitHub:',          'https://github.com/UsefNour/FPMS'),
 ]:
     p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     r1 = p.add_run(label + '  '); r1.font.name = 'Calibri'; r1.font.size = Pt(11)
@@ -316,8 +317,6 @@ s = OxmlElement('w:fldChar'); s.set(qn('w:fldCharType'), 'separate')
 e = OxmlElement('w:fldChar'); e.set(qn('w:fldCharType'), 'end')
 run._r.append(b); run._r.append(i); run._r.append(s); run._r.append(e)
 p = doc.add_paragraph()
-r = p.add_run('[ Right-click this area in Word and select "Update Field" to populate the table of contents ]')
-r.font.name = 'Calibri'; r.font.size = Pt(10); r.font.color.rgb = LIGHT; r.italic = True
 doc.add_page_break()
 
 # ═══════════════════════════════════════════════════════════════════════════════
