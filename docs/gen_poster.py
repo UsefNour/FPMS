@@ -269,9 +269,9 @@ shdr(RX, shots_top, RW, 'Application Screenshots')
 SY = shots_top - 0.26
 SH = 2.55   # each screenshot height
 
-add_img(os.path.join(DEST, '02_dashboard.png'), RX, SY-SH, RW, SH)
+add_img(os.path.join(DEST, '05_events.png'), RX, SY-SH, RW, SH)
 ax.text(RX+RW/2, SY-SH-0.18,
-        'Figure 1 — Dashboard: fight countdown, weight status, camp phase and readiness score',
+        'Figure 1 — Events listing: public discovery, multi-field filter, no login required',
         ha='center', va='top', fontsize=7.8, color=MGREY, style='italic', zorder=12)
 
 SY2 = SY - SH - 0.40
@@ -280,7 +280,7 @@ ax.text(RX+RW/2, SY2-SH-0.18,
         'Figure 2 — Sparring partner finder: Haversine-ranked cards with skill and distance',
         ha='center', va='top', fontsize=7.8, color=MGREY, style='italic', zorder=12)
 
-arch_top = SY2 - SH - 0.40
+arch_top = SY2 - SH - 0.58
 
 # ── System Architecture ───────────────────────────────────────────────────────
 shdr(RX, arch_top, RW, 'System Architecture')
